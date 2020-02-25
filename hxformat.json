@@ -1,0 +1,12 @@
+{
+	"whitespace": {
+		"typeCheckColonPolicy": "onlyAfter",
+		"typeHintColonPolicy": "onlyAfter"
+	},
+	"emptyLines": {
+		"classEmptyLines": {
+			"afterPrivateVars": 0,
+			"afterStaticVars": 0
+		}
+	}
+}

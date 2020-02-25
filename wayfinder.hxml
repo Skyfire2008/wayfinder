@@ -1,0 +1,4 @@
+-js bin/index.js
+-cp src
+-main org.skyfire2008.wayfinder.Main
+-lib knockout.hx
