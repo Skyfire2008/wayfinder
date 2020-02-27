@@ -12,8 +12,8 @@ class Main {
 			0, 0, 0, 1, 0, 0, 1, 1,
 			0, 0, 1, 1, 1, 0, 0, 0,
 			0, 0, 0, 1, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 1, 0,
-			1, 0, 1, 0, 1, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0,
+			1, 0, 1, 0, 0, 0, 0, 0,
 			0, 0, 1, 0, 0, 0, 0, 0
 		];
 
@@ -29,8 +29,10 @@ class Main {
 
 		var quads: Array<Array<Quad>> = [for (y in 0...height) [for (x in 0...width) null]];
 
-		trace(Node.makeQuad(0, 0, quads, tiles, 1, 1));
-		trace(Node.makeQuad(5, 2, quads, tiles, 1, 1));
-		trace(Node.makeQuad(2, 4, quads, tiles, 1, 1));
+		trace(Node.makeQuad(0, 0, quads, tiles));
+		trace(Node.makeQuad(5, 2, quads, tiles));
+		trace(Node.makeQuad(2, 4, quads, tiles));
+
+		trace(Node.makeNodes(tiles));
 	}
 }
