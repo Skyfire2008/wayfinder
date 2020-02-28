@@ -1,6 +1,6 @@
 package org.skyfire2008.wayfinder.test;
 
-import org.skyfire2008.wayfinder.geom.Quad;
+import org.skyfire2008.wayfinder.path.Region;
 import org.skyfire2008.wayfinder.path.Node;
 
 class Main {
@@ -27,11 +27,11 @@ class Main {
 			tiles.push(current);
 		}
 
-		var quads: Array<Array<Quad>> = [for (y in 0...height) [for (x in 0...width) null]];
+		var regions: Array<Array<Region>> = [for (y in 0...height) [for (x in 0...width) null]];
 
-		trace(Node.makeQuad(0, 0, quads, tiles));
-		trace(Node.makeQuad(5, 2, quads, tiles));
-		trace(Node.makeQuad(2, 4, quads, tiles));
+		trace(Node.makeRegion(0, 0, regions, tiles));
+		trace(Node.makeRegion(5, 2, regions, tiles));
+		trace(Node.makeRegion(2, 4, regions, tiles));
 
 		trace(Node.makeNodes(tiles));
 	}
