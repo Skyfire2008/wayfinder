@@ -1,4 +1,4 @@
-package org.skyfire2008.wayfinder;
+package org.skyfire2008.wayfinder.util;
 
 class Util {
 	public static inline function min(a: Int, b: Int): Int {

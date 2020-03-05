@@ -1,7 +1,7 @@
 package org.skyfire2008.wayfinder.test;
 
 import org.skyfire2008.wayfinder.path.Region;
-import org.skyfire2008.wayfinder.path.Node;
+import org.skyfire2008.wayfinder.path.NavMesh;
 
 class Main {
 	public static function main(): Void {
@@ -29,10 +29,10 @@ class Main {
 
 		var regions: Array<Array<Region>> = [for (y in 0...height) [for (x in 0...width) null]];
 
-		trace(Node.makeRegion(0, 0, regions, tiles));
-		trace(Node.makeRegion(5, 2, regions, tiles));
-		trace(Node.makeRegion(2, 4, regions, tiles));
+		trace(NavMesh.makeRegion(0, 0, regions, tiles));
+		trace(NavMesh.makeRegion(5, 2, regions, tiles));
+		trace(NavMesh.makeRegion(2, 4, regions, tiles));
 
-		trace(Node.makeNodes(tiles));
+		trace(NavMesh.makeNavMesh(tiles, 10, 10));
 	}
 }

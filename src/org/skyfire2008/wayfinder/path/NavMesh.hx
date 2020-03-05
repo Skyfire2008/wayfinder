@@ -1,34 +1,35 @@
 package org.skyfire2008.wayfinder.path;
 
-import org.skyfire2008.wayfinder.Util;
+import org.skyfire2008.wayfinder.geom.Point;
+import org.skyfire2008.wayfinder.util.Tuple;
+import org.skyfire2008.wayfinder.util.Util;
+import org.skyfire2008.wayfinder.geom.Rectangle;
 
 using Lambda;
 
-class Border {
-	public var x0: Int;
-	public var y0: Int;
-	public var x1: Int;
-	public var y1: Int;
+typedef Edge = Tuple<Int, Exit>;
 
-	public function new(x0: Int, y0: Int, x1: Int, y1: Int) {
-		this.x0 = x0;
-		this.y0 = y0;
-		this.x1 = x1;
-		this.y1 = y1;
+class NavMesh {
+	public var nodes: Array<Rectangle>;
+
+	public var adjacencies: Array<Array<Edge>>;
+
+	public function new(nodes: Array<Rectangle>) {
+		this.nodes = nodes;
+		this.adjacencies = [for (i in 0...nodes.length) []];
 	}
-}
 
-class Node {
-	private static var curId = 0;
+	public function addEdge(from: Int, to: Int, exit: Exit) {
+		adjacencies[from].push(new Edge(from, exit));
+		adjacencies[to].push(new Edge(from, exit));
+	}
 
-	public var id(default, null): Int;
-	public var region(default, null): Region;
-	private var exits: Array<Exit>;
-
-	public function new(region: Region, exits: Array<Exit> = null) {
-		this.id = Node.curId++;
-		this.region = region;
-		this.exits = exits == null ? new Array<Exit>() : exits;
+	private static function addEdgePrivate(mesh: NavMesh, from: Int, to: Int, exit: Exit): Bool {
+		var result = to > from;
+		if (result) {
+			mesh.addEdge(from, to, exit);
+		}
+		return result;
 	}
 
 	/**
@@ -92,15 +93,18 @@ class Node {
 		return result;
 	}
 
-	public static function makeNodes(walls: Array<Array<Bool>>): Array<Region> {
+	public static function makeNavMesh(walls: Array<Array<Bool>>, tileWidth: Float, tileHeight: Float): NavMesh {
 		var width = walls[0].length;
 		var height = walls.length;
+
+		var result: NavMesh = null;
 
 		// 2d array, showing where regions are located
 		var regions: Array<Array<Region>> = [for (y in 0...height) [for (x in 0...width) null]];
 		var y = 0;
 		var regionList = new Array<Region>();
 
+		// generate the regions
 		while (y < height) {
 			var x = 0;
 			while (x < width) {
@@ -109,9 +113,10 @@ class Node {
 					var tileRegion = regions[y][x];
 					// if current tile not occupied by region
 					if (tileRegion == null) {
-						var region = Node.makeRegion(x, y, regions, walls);
+						var region = NavMesh.makeRegion(x, y, regions, walls);
 						// trace('made region $region');
 						regionList.push(region);
+						region.setId(regionList.length - 1);
 						x += region.width;
 						// otherwise
 					} else {
@@ -125,16 +130,22 @@ class Node {
 			y++;
 		}
 
+		result = new NavMesh(regionList.map((elem: Region) -> {
+			return elem.toRect(tileWidth, tileHeight);
+		}));
+
+		// debug print
 		var ids = regions.map(function(line: Array<Region>) {
 			return line.map(function(r: Region) {
-				return r != null ? r.id : 0;
+				return r != null ? '${r.id}' : " ";
 			});
 		});
 
-		ids.iter(function(item: Array<Int>) {
+		ids.iter(function(item: Array<String>) {
 			trace(item);
 		});
 
+		// now get the region exits
 		var x = 0;
 		var y = 0;
 		for (region in regionList) {
@@ -150,6 +161,7 @@ class Node {
 						var y0 = Util.max(region.y, other.y);
 						var y1 = Util.min(region.bottom, other.bottom);
 						y = y1;
+						NavMesh.addEdgePrivate(result, region.id, other.id, new Exit(new Point(x, y0), new Point(x, y1)));
 						trace('regions ${region.id} and ${other.id} border at x=${region.right} y=($y0, $y1)');
 					}
 				}
@@ -167,6 +179,7 @@ class Node {
 						var x0 = Util.max(region.x, other.x);
 						var x1 = Util.min(region.right, other.right);
 						x = x1;
+						NavMesh.addEdgePrivate(result, region.id, other.id, new Exit(new Point(x0, y), new Point(x1, y)));
 						trace('regions ${region.id} and ${other.id} border at x=($x0, $x1) y=${region.bottom}');
 					}
 				}
@@ -184,6 +197,7 @@ class Node {
 						var y0 = Util.max(region.y, other.y);
 						var y1 = Util.min(region.bottom, other.bottom);
 						y = y1;
+						NavMesh.addEdgePrivate(result, region.id, other.id, new Exit(new Point(x, y0), new Point(x, y1)));
 						trace('regions ${region.id} and ${other.id} border at x=${region.x} y=($y0, $y1)');
 					}
 				}
@@ -201,11 +215,13 @@ class Node {
 						var x0 = Util.max(region.x, other.x);
 						var x1 = Util.min(region.right, other.right);
 						x = x1;
+						NavMesh.addEdgePrivate(result, region.id, other.id, new Exit(new Point(x0, y), new Point(x1, y)));
 						trace('regions ${region.id} and ${other.id} border at x=($x0, $x1) y=${region.y}');
 					}
 				}
 			}
 		}
-		return regionList;
+
+		return result;
 	}
 }
