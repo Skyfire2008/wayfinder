@@ -2,10 +2,12 @@ package org.skyfire2008.wayfinder;
 
 import js.Browser;
 
-import org.skyfire2008.wayfinder.geom.Point;
+import org.skyfire2008.wayfinder.path.NavMesh;
 
 import knockout.Knockout;
 import knockout.Observable;
+
+using Lambda;
 
 class ViewModel {
 	public var width: Int;
@@ -16,6 +18,9 @@ class ViewModel {
 
 	public var walls: Array<Array<Observable<Bool>>>;
 	public var drawing: Observable<Bool>;
+	public var removing: Observable<Bool>;
+
+	public var navMesh: Observable<NavMesh>;
 
 	public function new(width: Int, height: Int, tileWidth: Float, tileHeight: Float) {
 		this.width = width;
@@ -24,18 +29,25 @@ class ViewModel {
 		this.tileHeight = tileHeight;
 
 		this.walls = [
-			for (y in 0...height) [for (x in 0...width) Knockout.observable(Math.random() > 0.5)]
+			for (y in 0...height) [
+				for (x in 0...width)
+					Knockout.observable(Math.random() > x * y / (width * height))
+			]
 		];
 
 		this.drawing = Knockout.observable(false);
+		this.removing = Knockout.observable(false);
+
+		this.navMesh = Knockout.observable(null);
 	}
 
-	public function onMouseDown() {
-		drawing.set(true);
-	}
-
-	public function onMouseUp() {
-		drawing.set(false);
+	public function genNavMesh() {
+		var walls = this.walls.map(function(line) {
+			return line.map(function(elem) {
+				return elem.get();
+			});
+		});
+		this.navMesh.set(NavMesh.makeNavMesh(walls, this.tileWidth, this.tileHeight));
 	}
 }
 
@@ -45,7 +57,7 @@ class Main {
 	}
 
 	public static function init() {
-		var viewModel = new ViewModel(50, 50, 10, 10);
+		var viewModel = new ViewModel(15, 15, 10, 10);
 		Knockout.applyBindings(viewModel);
 	}
 }

@@ -20,7 +20,7 @@ class NavMesh {
 	}
 
 	public function addEdge(from: Int, to: Int, exit: Exit) {
-		adjacencies[from].push(new Edge(from, exit));
+		adjacencies[from].push(new Edge(to, exit));
 		adjacencies[to].push(new Edge(from, exit));
 	}
 
@@ -130,7 +130,7 @@ class NavMesh {
 			y++;
 		}
 
-		result = new NavMesh(regionList.map((elem: Region) -> {
+		result = new NavMesh(regionList.map(function(elem: Region) {
 			return elem.toRect(tileWidth, tileHeight);
 		}));
 
