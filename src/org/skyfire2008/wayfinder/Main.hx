@@ -1,8 +1,43 @@
 package org.skyfire2008.wayfinder;
 
 import js.Browser;
+
 import org.skyfire2008.wayfinder.geom.Point;
-import org.skyfire2008.wayfinder.geom.Triangle;
+
+import knockout.Knockout;
+import knockout.Observable;
+
+class ViewModel {
+	public var width: Int;
+	public var height: Int;
+
+	public var tileWidth: Float;
+	public var tileHeight: Float;
+
+	public var walls: Array<Array<Observable<Bool>>>;
+	public var drawing: Observable<Bool>;
+
+	public function new(width: Int, height: Int, tileWidth: Float, tileHeight: Float) {
+		this.width = width;
+		this.height = height;
+		this.tileWidth = tileWidth;
+		this.tileHeight = tileHeight;
+
+		this.walls = [
+			for (y in 0...height) [for (x in 0...width) Knockout.observable(Math.random() > 0.5)]
+		];
+
+		this.drawing = Knockout.observable(false);
+	}
+
+	public function onMouseDown() {
+		drawing.set(true);
+	}
+
+	public function onMouseUp() {
+		drawing.set(false);
+	}
+}
 
 class Main {
 	public static function main() {
@@ -10,10 +45,7 @@ class Main {
 	}
 
 	public static function init() {
-		var points: Array<Point> = [];
-		for (i in 0...10) {
-			points.push(new Point(Math.random() * 800, Math.random() * 600));
-		}
-		trace(Triangle.triangulate(800, 600, points));
+		var viewModel = new ViewModel(50, 50, 10, 10);
+		Knockout.applyBindings(viewModel);
 	}
 }

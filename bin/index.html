@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<script src="knockout-3.2.0.debug.js"></script>
+	<script src="index.js"></script>
+</head>
+
+<body>
+	<svg data-bind="
+		event: {
+			mousedown: onMouseDown,
+			mouseup: onMouseUp
+		}, attr:{
+			width: width*tileWidth,
+			height: height*tileHeight
+		}">
+
+		<!-- ko foreach: walls -->
+		<!-- ko foreach: $data -->
+		<rect data-bind="
+			attr: {
+				x: $index()*$root.tileWidth, 
+				y: $parentContext.$index()*$root.tileHeight, 
+				width: $root.tileWidth, 
+				height: $root.tileHeight,
+				'fill-opacity': $data ? 1.0 : 0.0
+			}, event: {
+				mouseenter: ()=>{if($root.drawing()){ $rawData(!$rawData())} }
+			}">
+		</rect>
+		<!-- /ko -->
+		<!-- /ko -->
+	</svg>
+</body>
+
+</html>
