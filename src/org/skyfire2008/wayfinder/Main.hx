@@ -31,7 +31,7 @@ class ViewModel {
 		this.walls = [
 			for (y in 0...height) [
 				for (x in 0...width)
-					Knockout.observable(Math.random() > x * y / (width * height))
+					Knockout.observable(Math.random() > Math.sqrt(x * y / (width * height)))
 			]
 		];
 
@@ -57,7 +57,7 @@ class Main {
 	}
 
 	public static function init() {
-		var viewModel = new ViewModel(15, 15, 10, 10);
+		var viewModel = new ViewModel(15, 15, 20, 20);
 		Knockout.applyBindings(viewModel);
 	}
 }
