@@ -81,6 +81,7 @@ class NavMesh {
 			curHeight++;
 		}
 
+		// TODO: region 2d array should only contain indices of regions in region array
 		var result = new Region(startX, startY, maxAreaWidth, maxAreaHeight);
 		// occupy the cells in regions array
 		for (i in 0...maxAreaWidth) {
