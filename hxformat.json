@@ -4,6 +4,10 @@
 		"typeHintColonPolicy": "onlyAfter"
 	},
 	"emptyLines": {
+		"afterBlocks": "keep",
+		"beforeBlocks": "keep",
+		"afterLeftCurly": "keep",
+		"beforeRightCurly": "keep",
 		"classEmptyLines": {
 			"afterPrivateVars": 0,
 			"afterStaticVars": 0

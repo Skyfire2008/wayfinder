@@ -2,12 +2,12 @@
 <html lang="en">
 
 <head>
-    <script src="knockout-3.2.0.debug.js"></script>
-    <script src="index.js"></script>
+	<script src="knockout-3.5.1.debug.js"></script>
+	<script src="index.js"></script>
 </head>
 
 <body>
-    <svg data-bind="
+	<svg data-bind="
         event: {
             mouseup: ()=>{drawing(false);}
         },
@@ -15,45 +15,82 @@
 			width: width*tileWidth,
 			height: height*tileHeight
         }">
+		<defs>
+			<g id="flag" stroke-width="2">
+				<line x1="0" y1="20" x2="20" y2="20" />
+				<line x1="10" y1="0" x2="10" y2="20" />
+				<line x1="10" y1="0" x2="20" y2="5" />
+				<line x1="20" y1="5" x2="10" y2="10" />
+			</g>
+			<g id="path" stroke-width="2" stroke="red">
+				<circle cx="10" cy="10" r="5" fill="none">
+			</g>
+		</defs>
 
-        <!-- ko foreach: walls -->
-        <!-- ko foreach: $data -->
-        <rect data-bind="
+		<!-- ko foreach: walls -->
+		<!-- ko foreach: $data -->
+		<!-- ko let: {x: $index(), y: $parentContext.$index() } -->
+		<rect data-bind="
 			attr: {
-				x: $index()*$root.tileWidth,
-				y: $parentContext.$index()*$root.tileHeight,
+				x: x*$root.tileWidth,
+				y: y*$root.tileHeight,
 				width: $root.tileWidth,
 				height: $root.tileHeight,
 				'fill-opacity': $data ? 1.0 : 0.0
 			}, event: {
-                mousedown: ()=>{
-                    $root.drawing(true);
-                    $root.removing($rawData());
-                    if($root.removing() === $rawData()){
-                        $rawData(!$rawData());
-                    }
-                },
+                mousedown: (data, e) => $root.onTileMouseDown(x, y, e),
 				mouseenter: ()=>{
                     if($root.drawing() && $rawData() === $root.removing()){
                         $rawData(!$rawData());
                     }
                 }
 			}">
-        </rect>
-        <!-- /ko -->
-        <!-- /ko -->
+		</rect>
+		<!-- /ko -->
+		<!-- /ko -->
+		<!-- /ko -->
 
-        <!-- ko if: navMesh() -->
-        <!-- ko foreach: navMesh().nodes -->
-        <rect stroke="red" fill="none"
-            data-bind="attr: {x: $data.x, y: $data.y, width: $data.width, height: $data.height}">
-        </rect>
-        <!-- /ko -->
-        <!-- /ko -->
-    </svg>
-    <div>
-        <button data-bind="click: genNavMesh">Generate nav mesh</button>
-    </div>
+		<!-- ko foreach: path() -->
+		<use href="#path" data-bind="
+			attr: {
+				x: $data.x*$root.tileWidth,
+				y: $data.y*$root.tileHeight
+			}
+		"></use>
+		<!-- /ko -->
+
+		<!-- ko if: startPos() -->
+		<use href="#flag" stroke="#00e000" data-bind="
+			attr: {
+				x: startPos().x*tileWidth,
+				y: startPos().y*tileHeight
+			}
+		"></use>
+		<!-- /ko -->
+
+		<!-- ko if: endPos() -->
+		<use href="#flag" stroke="red" data-bind="
+			attr: {
+				x: endPos().x*tileWidth,
+				y: endPos().y*tileHeight
+			}
+		"></use>
+		<!-- /ko -->
+
+		<!-- ko if: navMesh() -->
+		<!-- ko foreach: navMesh().nodes -->
+		<rect stroke="red" fill="none"
+			data-bind="attr: {x: $data.x, y: $data.y, width: $data.width, height: $data.height}">
+		</rect>
+		<!-- /ko -->
+		<!-- /ko -->
+	</svg>
+	<div>
+		<button data-bind="click: setStart">Set start</button>
+		<button data-bind="click: setEnd">Set end</button>
+		<button data-bind="click: genNavMesh">Generate nav mesh</button>
+		<button data-bind="click: findPath">Find path</button>
+	</div>
 </body>
 
 </html>
