@@ -30,6 +30,9 @@ class ViewModel {
 
 	public var navMesh: Observable<NavMesh>;
 	public var path: Observable<Array<IntPoint>>;
+	public var message: Observable<String>;
+
+	private var mapChanged = false;
 
 	public function new(width: Int, height: Int, tileWidth: Float, tileHeight: Float) {
 		this.width = width;
@@ -53,6 +56,7 @@ class ViewModel {
 
 		this.navMesh = Knockout.observable(null);
 		this.path = Knockout.observable([]);
+		this.message = Knockout.observable(null);
 	}
 
 	public function onTileMouseDown(x: Int, y: Int, e: MouseEvent) {
@@ -72,6 +76,13 @@ class ViewModel {
 			if (removing.get() == isWall.get()) {
 				isWall.set(!isWall.get());
 			}
+		}
+	}
+
+	public function onTileMouseEnter(x: Int, y: Int, e: MouseEvent) {
+		var isWall = walls[y][x];
+		if (drawing.get() && isWall.get() == removing.get()) {
+			isWall.set(!isWall.get());
 		}
 	}
 
@@ -105,7 +116,7 @@ class ViewModel {
 			var temp = Path.findAStar(map, startPos.get(), endPos.get());
 			path.set(temp.points);
 		} catch (e) {
-			// TODO:
+			message.set(e.message);
 		}
 	}
 }
@@ -116,7 +127,7 @@ class Main {
 	}
 
 	public static function init() {
-		var viewModel = new ViewModel(15, 15, 20, 20);
+		var viewModel = new ViewModel(10, 10, 20, 20);
 		Knockout.applyBindings(viewModel);
 	}
 }

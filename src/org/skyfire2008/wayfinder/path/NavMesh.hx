@@ -136,15 +136,15 @@ class NavMesh {
 		}));
 
 		// debug print
-		var ids = regions.map(function(line: Array<Region>) {
-			return line.map(function(r: Region) {
-				return r != null ? '${r.id}' : " ";
+		/*var ids = regions.map(function(line: Array<Region>) {
+				return line.map(function(r: Region) {
+					return r != null ? '${r.id}' : " ";
+				});
 			});
-		});
 
-		ids.iter(function(item: Array<String>) {
-			trace(item);
-		});
+			ids.iter(function(item: Array<String>) {
+				trace(item);
+		});*/
 
 		// now get the region exits
 		var x = 0;
@@ -163,7 +163,7 @@ class NavMesh {
 						var y1 = Util.min(region.bottom, other.bottom);
 						y = y1;
 						NavMesh.addEdgePrivate(result, region.id, other.id, new Exit(new Point(x, y0), new Point(x, y1)));
-						trace('regions ${region.id} and ${other.id} border at x=${region.right} y=($y0, $y1)');
+						// trace('regions ${region.id} and ${other.id} border at x=${region.right} y=($y0, $y1)');
 					}
 				}
 			}
@@ -181,7 +181,7 @@ class NavMesh {
 						var x1 = Util.min(region.right, other.right);
 						x = x1;
 						NavMesh.addEdgePrivate(result, region.id, other.id, new Exit(new Point(x0, y), new Point(x1, y)));
-						trace('regions ${region.id} and ${other.id} border at x=($x0, $x1) y=${region.bottom}');
+						// trace('regions ${region.id} and ${other.id} border at x=($x0, $x1) y=${region.bottom}');
 					}
 				}
 			}
@@ -199,7 +199,7 @@ class NavMesh {
 						var y1 = Util.min(region.bottom, other.bottom);
 						y = y1;
 						NavMesh.addEdgePrivate(result, region.id, other.id, new Exit(new Point(x, y0), new Point(x, y1)));
-						trace('regions ${region.id} and ${other.id} border at x=${region.x} y=($y0, $y1)');
+						// trace('regions ${region.id} and ${other.id} border at x=${region.x} y=($y0, $y1)');
 					}
 				}
 			}
@@ -217,7 +217,7 @@ class NavMesh {
 						var x1 = Util.min(region.right, other.right);
 						x = x1;
 						NavMesh.addEdgePrivate(result, region.id, other.id, new Exit(new Point(x0, y), new Point(x1, y)));
-						trace('regions ${region.id} and ${other.id} border at x=($x0, $x1) y=${region.y}');
+						// trace('regions ${region.id} and ${other.id} border at x=($x0, $x1) y=${region.y}');
 					}
 				}
 			}
