@@ -7,6 +7,7 @@ import org.skyfire2008.wayfinder.geom.IntPoint;
 import org.skyfire2008.wayfinder.path.NavMesh;
 import org.skyfire2008.wayfinder.path.Map;
 import org.skyfire2008.wayfinder.path.Path;
+import org.skyfire2008.wayfinder.mapGen.Cave;
 
 import knockout.Knockout;
 import knockout.Observable;
@@ -33,6 +34,7 @@ class ViewModel {
 	public var message: Observable<String>;
 
 	private var mapChanged = false;
+	private var map: Map;
 
 	public function new(width: Int, height: Int, tileWidth: Float, tileHeight: Float) {
 		this.width = width;
@@ -40,10 +42,13 @@ class ViewModel {
 		this.tileWidth = tileWidth;
 		this.tileHeight = tileHeight;
 
+		var cave = new Cave(0.5, 3, 4, 5);
+		var map = cave.makeMap(width, height);
+
 		this.walls = [
 			for (y in 0...height) [
 				for (x in 0...width)
-					Knockout.observable(Math.random() > Math.sqrt(x * y / (width * height)))
+					Knockout.observable(map.walls[y][x])
 			]
 		];
 
@@ -127,7 +132,7 @@ class Main {
 	}
 
 	public static function init() {
-		var viewModel = new ViewModel(10, 10, 20, 20);
+		var viewModel = new ViewModel(40, 40, 20, 20);
 		Knockout.applyBindings(viewModel);
 	}
 }

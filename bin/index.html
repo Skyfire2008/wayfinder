@@ -12,9 +12,10 @@
 
 		<div class="column">
 
-			<svg data-bind="
+			<svg style="border: 1px solid black" data-bind="
         		event: {
-            		mouseup: ()=>{drawing(false);}
+            		mouseup: () => drawing(false),
+					mouseleave: () => drawing(false)
         		},
         		attr:{
 					width: width*tileWidth,
