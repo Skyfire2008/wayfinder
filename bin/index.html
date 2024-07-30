@@ -12,6 +12,11 @@
 
 		<div class="column">
 
+			<div class="row">
+				<select data-bind="options: generators, optionsText: 'name', value: generator"></select>
+				<button data-bind="click: generateMap">Generate!</button>
+			</div>
+
 			<svg style="border: 1px solid black" data-bind="
         		event: {
             		mouseup: () => drawing(false),
@@ -30,7 +35,7 @@
 						<line x1="20" y1="5" x2="10" y2="10" />
 					</g>
 					<g id="path" stroke-width="2" stroke="red">
-						<circle cx="10" cy="10" r="5" fill="none">
+						<circle cx="10" cy="10" r="5" fill="red">
 					</g>
 				</defs>
 

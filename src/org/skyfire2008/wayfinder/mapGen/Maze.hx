@@ -8,13 +8,6 @@ import polygonal.ds.PriorityQueue;
 
 import org.skyfire2008.wayfinder.util.IntIterator;
 
-enum PassageDir {
-	Up;
-	Right;
-	Down;
-	Left;
-}
-
 class Passage implements Prioritizable {
 	public var priority(default, null): Float;
 	public var position(default, null): Int;
@@ -74,31 +67,39 @@ class Maze implements Generator {
 			add(passage.next);
 			walls[passage.pos.y][passage.pos.x] = false;
 
+			var getProb = (pos: IntPoint, isX: Bool) -> {
+				return Math.random();
+			}
+
 			if (passage.next.x + 2 < width) {
 				var next: IntPoint = {x: passage.next.x + 2, y: passage.next.y};
 				if (!isAdded(next)) {
-					passageQueue.enqueue(new Passage({x: passage.next.x + 1, y: passage.next.y}, next, Math.random()));
+					var pos = {x: passage.next.x + 1, y: passage.next.y};
+					passageQueue.enqueue(new Passage(pos, next, getProb(pos, true)));
 				}
 			}
 
 			if (passage.next.y + 2 < height) {
 				var next: IntPoint = {x: passage.next.x, y: passage.next.y + 2};
 				if (!isAdded(next)) {
-					passageQueue.enqueue(new Passage({x: passage.next.x, y: passage.next.y + 1}, next, Math.random()));
+					var pos = {x: passage.next.x, y: passage.next.y + 1};
+					passageQueue.enqueue(new Passage(pos, next, getProb(pos, false)));
 				}
 			}
 
 			if (passage.next.x - 2 >= 0) {
 				var next: IntPoint = {x: passage.next.x - 2, y: passage.next.y};
 				if (!isAdded(next)) {
-					passageQueue.enqueue(new Passage({x: passage.next.x - 1, y: passage.next.y}, next, Math.random()));
+					var pos = {x: passage.next.x - 1, y: passage.next.y};
+					passageQueue.enqueue(new Passage(pos, next, getProb(pos, true)));
 				}
 			}
 
 			if (passage.next.y - 2 >= 0) {
 				var next: IntPoint = {x: passage.next.x, y: passage.next.y - 2};
 				if (!isAdded(next)) {
-					passageQueue.enqueue(new Passage({x: passage.next.x, y: passage.next.y - 1}, next, Math.random()));
+					var pos = {x: passage.next.x, y: passage.next.y - 1};
+					passageQueue.enqueue(new Passage(pos, next, getProb(pos, false)));
 				}
 			}
 		}

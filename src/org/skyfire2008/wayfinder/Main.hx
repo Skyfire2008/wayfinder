@@ -1,5 +1,7 @@
 package org.skyfire2008.wayfinder;
 
+import org.skyfire2008.wayfinder.mapGen.Random;
+
 import js.html.MouseEvent;
 import js.Browser;
 
@@ -7,13 +9,20 @@ import org.skyfire2008.wayfinder.geom.IntPoint;
 import org.skyfire2008.wayfinder.path.NavMesh;
 import org.skyfire2008.wayfinder.path.Map;
 import org.skyfire2008.wayfinder.path.Path;
+import org.skyfire2008.wayfinder.mapGen.Generator;
 import org.skyfire2008.wayfinder.mapGen.Cave;
 import org.skyfire2008.wayfinder.mapGen.Maze;
 
 import knockout.Knockout;
 import knockout.Observable;
+import knockout.ObservableArray;
 
 using Lambda;
+
+typedef GenInfo = {
+	var name: String;
+	var gen: Generator;
+};
 
 class ViewModel {
 	public var width: Int;
@@ -22,7 +31,7 @@ class ViewModel {
 	public var tileWidth: Float;
 	public var tileHeight: Float;
 
-	public var walls: Array<Array<Observable<Bool>>>;
+	public var walls: Observable<Array<Array<Observable<Bool>>>>;
 	public var drawing: Observable<Bool>;
 	public var removing: Observable<Bool>;
 	public var settingStart: Observable<Bool>;
@@ -34,24 +43,21 @@ class ViewModel {
 	public var path: Observable<Array<IntPoint>>;
 	public var message: Observable<String>;
 
-	private var mapChanged = false;
+	public var generators: Array<GenInfo> = [
+		{name: "Random", gen: new Random(0.4)},
+		{name: "Cave", gen: new Cave(0.5, 3, 4, 5)},
+		{name: "Maze", gen: new Maze()}
+	];
+	public var generator: Observable<GenInfo>;
 	private var map: Map;
+
+	private var mapChanged = false;
 
 	public function new(width: Int, height: Int, tileWidth: Float, tileHeight: Float) {
 		this.width = width;
 		this.height = height;
 		this.tileWidth = tileWidth;
 		this.tileHeight = tileHeight;
-
-		var cave = new Maze();
-		var map = cave.makeMap(width, height);
-
-		this.walls = [
-			for (y in 0...height) [
-				for (x in 0...width)
-					Knockout.observable(map.walls[y][x])
-			]
-		];
 
 		this.drawing = Knockout.observable(false);
 		this.removing = Knockout.observable(false);
@@ -63,10 +69,14 @@ class ViewModel {
 		this.navMesh = Knockout.observable(null);
 		this.path = Knockout.observable([]);
 		this.message = Knockout.observable(null);
+
+		this.generator = Knockout.observable(generators[0]);
+		this.walls = Knockout.observable();
+		generateMap();
 	}
 
 	public function onTileMouseDown(x: Int, y: Int, e: MouseEvent) {
-		var isWall = walls[y][x];
+		var isWall = walls.get()[y][x];
 
 		if (settingStart.get()) {
 			startPos.set({x: x, y: y});
@@ -86,19 +96,30 @@ class ViewModel {
 	}
 
 	public function onTileMouseEnter(x: Int, y: Int, e: MouseEvent) {
-		var isWall = walls[y][x];
+		var isWall = walls.get()[y][x];
 		if (drawing.get() && isWall.get() == removing.get()) {
 			isWall.set(!isWall.get());
 		}
 	}
 
 	public function genNavMesh() {
-		var walls = this.walls.map(function(line) {
+		var walls = this.walls.get().map(function(line) {
 			return line.map(function(elem) {
 				return elem.get();
 			});
 		});
 		this.navMesh.set(NavMesh.makeNavMesh(walls, this.tileWidth, this.tileHeight));
+	}
+
+	public function generateMap() {
+		this.map = generator.get().gen.makeMap(width, height);
+		var newWalls = [
+			for (y in 0...height) [
+				for (x in 0...width)
+					Knockout.observable(map.walls[y][x])
+			]
+		];
+		this.walls.set(newWalls);
 	}
 
 	public function setStart() {
@@ -113,7 +134,7 @@ class ViewModel {
 
 	public function findPath() {
 		var boolWalls: Array<Array<Bool>> = [];
-		for (wall in walls) {
+		for (wall in walls.get()) {
 			boolWalls.push(wall.map((e) -> e.get()));
 		}
 
@@ -133,7 +154,7 @@ class Main {
 	}
 
 	public static function init() {
-		var viewModel = new ViewModel(39, 39, 20, 20);
+		var viewModel = new ViewModel(59, 59, 20, 20);
 		Knockout.applyBindings(viewModel);
 	}
 }
