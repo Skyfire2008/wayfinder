@@ -14,17 +14,25 @@
 
 			<div class="row">
 				<select data-bind="options: generators, optionsText: 'name', value: generator"></select>
+				<div>
+					<label>Width:</label>
+					<input data-bind="value: width" type="number"></input>
+				</div>
+				<div>
+					<label>Height:</label>
+					<input data-bind="value: height" type="number"></input>
+				</div>
 				<button data-bind="click: generateMap">Generate!</button>
 			</div>
 
 			<svg style="border: 1px solid black" data-bind="
         		event: {
-            		mouseup: () => drawing(false),
-					mouseleave: () => drawing(false)
+            		mouseup: stopDrawing,
+					mouseleave: stopDrawing
         		},
         		attr:{
-					width: width*tileWidth,
-					height: height*tileHeight
+					width: width()*tileWidth,
+					height: height()*tileHeight
        			}
 				">
 				<defs>
@@ -48,7 +56,7 @@
 						y: y*$root.tileHeight,
 						width: $root.tileWidth,
 						height: $root.tileHeight,
-						'fill-opacity': $data ? 1.0 : 0.0
+						fill: $data ? '#303030' : '#cccccc'
 					}, event: {
                 		mousedown: (data, e) => $root.onTileMouseDown(x, y, e),
 						mouseenter: (data, e) => $root.onTileMouseEnter(x, y, e)

@@ -15,7 +15,6 @@ import org.skyfire2008.wayfinder.mapGen.Maze;
 
 import knockout.Knockout;
 import knockout.Observable;
-import knockout.ObservableArray;
 
 using Lambda;
 
@@ -25,14 +24,13 @@ typedef GenInfo = {
 };
 
 class ViewModel {
-	public var width: Int;
-	public var height: Int;
+	public var width: Observable<Int>;
+	public var height: Observable<Int>;
 
 	public var tileWidth: Float;
 	public var tileHeight: Float;
 
 	public var walls: Observable<Array<Array<Observable<Bool>>>>;
-	public var drawing: Observable<Bool>;
 	public var removing: Observable<Bool>;
 	public var settingStart: Observable<Bool>;
 	public var settingEnd: Observable<Bool>;
@@ -51,15 +49,15 @@ class ViewModel {
 	public var generator: Observable<GenInfo>;
 	private var map: Map;
 
+	private var drawing = false;
 	private var mapChanged = false;
 
 	public function new(width: Int, height: Int, tileWidth: Float, tileHeight: Float) {
-		this.width = width;
-		this.height = height;
+		this.width = Knockout.observable(width);
+		this.height = Knockout.observable(height);
 		this.tileWidth = tileWidth;
 		this.tileHeight = tileHeight;
 
-		this.drawing = Knockout.observable(false);
 		this.removing = Knockout.observable(false);
 		this.settingStart = Knockout.observable(false);
 		this.settingEnd = Knockout.observable(false);
@@ -75,6 +73,10 @@ class ViewModel {
 		generateMap();
 	}
 
+	public function stopDrawing() {
+		drawing = false;
+	}
+
 	public function onTileMouseDown(x: Int, y: Int, e: MouseEvent) {
 		var isWall = walls.get()[y][x];
 
@@ -87,7 +89,7 @@ class ViewModel {
 			settingEnd.set(false);
 
 		} else {
-			drawing.set(true);
+			drawing = true;
 			removing.set(isWall.get());
 			if (removing.get() == isWall.get()) {
 				isWall.set(!isWall.get());
@@ -97,7 +99,7 @@ class ViewModel {
 
 	public function onTileMouseEnter(x: Int, y: Int, e: MouseEvent) {
 		var isWall = walls.get()[y][x];
-		if (drawing.get() && isWall.get() == removing.get()) {
+		if (drawing && isWall.get() == removing.get()) {
 			isWall.set(!isWall.get());
 		}
 	}
@@ -112,6 +114,9 @@ class ViewModel {
 	}
 
 	public function generateMap() {
+		var width = this.width.get();
+		var height = this.height.get();
+
 		this.map = generator.get().gen.makeMap(width, height);
 		var newWalls = [
 			for (y in 0...height) [
@@ -120,6 +125,12 @@ class ViewModel {
 			]
 		];
 		this.walls.set(newWalls);
+
+		// reset state
+		this.navMesh.set(null);
+		this.path.set(null);
+		this.startPos.set(null);
+		this.endPos.set(null);
 	}
 
 	public function setStart() {
