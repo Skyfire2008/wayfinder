@@ -16,11 +16,11 @@
 				<select data-bind="options: generators, optionsText: 'name', value: generator"></select>
 				<div>
 					<label>Width:</label>
-					<input data-bind="value: width" type="number"></input>
+					<input data-bind="value: tempWidth" type="number"></input>
 				</div>
 				<div>
 					<label>Height:</label>
-					<input data-bind="value: height" type="number"></input>
+					<input data-bind="value: tempHeight" type="number"></input>
 				</div>
 				<button data-bind="click: generateMap">Generate!</button>
 			</div>
@@ -42,8 +42,8 @@
 						<line x1="10" y1="0" x2="20" y2="5" />
 						<line x1="20" y1="5" x2="10" y2="10" />
 					</g>
-					<g id="path" stroke-width="2" stroke="red">
-						<circle cx="10" cy="10" r="5" fill="red">
+					<g id="path" stroke-width="2" stroke="#ff0000">
+						<circle cx="10" cy="10" r="5" fill="#ff0000">
 					</g>
 				</defs>
 

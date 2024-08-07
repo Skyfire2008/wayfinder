@@ -1,5 +1,8 @@
 package org.skyfire2008.wayfinder;
 
+import js.html.InputElement;
+import js.html.Event;
+
 import org.skyfire2008.wayfinder.mapGen.Random;
 
 import js.html.MouseEvent;
@@ -24,8 +27,10 @@ typedef GenInfo = {
 };
 
 class ViewModel {
-	public var width: Observable<Int>;
+	public var tempWidth: Observable<Int>;
+	public var tempHeight: Observable<Int>;
 	public var height: Observable<Int>;
+	public var width: Observable<Int>;
 
 	public var tileWidth: Float;
 	public var tileHeight: Float;
@@ -53,6 +58,8 @@ class ViewModel {
 	private var mapChanged = false;
 
 	public function new(width: Int, height: Int, tileWidth: Float, tileHeight: Float) {
+		this.tempWidth = Knockout.observable(width);
+		this.tempHeight = Knockout.observable(height);
 		this.width = Knockout.observable(width);
 		this.height = Knockout.observable(height);
 		this.tileWidth = tileWidth;
@@ -114,8 +121,8 @@ class ViewModel {
 	}
 
 	public function generateMap() {
-		var width = this.width.get();
-		var height = this.height.get();
+		var width = this.tempWidth.get();
+		var height = this.tempHeight.get();
 
 		this.map = generator.get().gen.makeMap(width, height);
 		var newWalls = [
@@ -125,8 +132,11 @@ class ViewModel {
 			]
 		];
 		this.walls.set(newWalls);
+		this.width.set(width);
+		this.height.set(height);
 
 		// reset state
+		this.message.set(null);
 		this.navMesh.set(null);
 		this.path.set(null);
 		this.startPos.set(null);
@@ -151,7 +161,7 @@ class ViewModel {
 
 		var map = new Map(boolWalls, tileWidth, tileHeight);
 		try {
-			var temp = Path.findAStar(map, startPos.get(), endPos.get());
+			var temp = Path.findThetaStar(map, startPos.get(), endPos.get());
 			path.set(temp.points);
 		} catch (e) {
 			message.set(e.message);
