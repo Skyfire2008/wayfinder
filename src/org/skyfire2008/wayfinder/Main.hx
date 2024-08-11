@@ -1,8 +1,5 @@
 package org.skyfire2008.wayfinder;
 
-import js.html.InputElement;
-import js.html.Event;
-
 import org.skyfire2008.wayfinder.mapGen.Random;
 
 import js.html.MouseEvent;
@@ -26,6 +23,11 @@ typedef GenInfo = {
 	var gen: Generator;
 };
 
+typedef Line = {
+	var a: IntPoint;
+	var b: IntPoint;
+};
+
 class ViewModel {
 	public var tempWidth: Observable<Int>;
 	public var tempHeight: Observable<Int>;
@@ -43,7 +45,7 @@ class ViewModel {
 	public var endPos: Observable<IntPoint>;
 
 	public var navMesh: Observable<NavMesh>;
-	public var path: Observable<Array<IntPoint>>;
+	public var path: Observable<Array<Line>>;
 	public var message: Observable<String>;
 
 	public var generators: Array<GenInfo> = [
@@ -153,7 +155,15 @@ class ViewModel {
 		settingEnd.set(true);
 	}
 
-	public function findPath() {
+	public function findAPath() {
+		findPath(Path.findAStar);
+	}
+
+	public function findThetaPath() {
+		findPath(Path.findThetaStar);
+	}
+
+	private function findPath(findPath: (Map, IntPoint, IntPoint) -> Path) {
 		var boolWalls: Array<Array<Bool>> = [];
 		for (wall in walls.get()) {
 			boolWalls.push(wall.map((e) -> e.get()));
@@ -161,8 +171,32 @@ class ViewModel {
 
 		var map = new Map(boolWalls, tileWidth, tileHeight);
 		try {
-			var temp = Path.findThetaStar(map, startPos.get(), endPos.get());
-			path.set(temp.points);
+			var timeStart = Browser.window.performance.now();
+			var temp = findPath(map, startPos.get(), endPos.get());
+			var time = Browser.window.performance.now() - timeStart;
+
+			var resultingPath: Array<Line> = [];
+			var pathLength: Float = 0;
+			for (i in 0...temp.points.length - 1) {
+				var a = temp.points[i];
+				var b = temp.points[i + 1];
+				resultingPath.push({a: a, b: b});
+				var dx = b.x - a.x;
+				var dy = b.y - a.y;
+				pathLength += Math.sqrt(dx * dx + dy * dy);
+			}
+
+			// last segment
+			var a = temp.points[temp.points.length - 2];
+			var b = temp.points[temp.points.length - 1];
+			resultingPath.push({a: a, b: b});
+			var dx = b.x - a.x;
+			var dy = b.y - a.y;
+			pathLength += Math.sqrt(dx * dx + dy * dy);
+
+			path.set(resultingPath);
+			message.set("Path length: " + pathLength + ", elapsed time: " + time);
+
 		} catch (e) {
 			message.set(e.message);
 		}

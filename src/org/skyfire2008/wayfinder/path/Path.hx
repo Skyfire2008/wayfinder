@@ -170,6 +170,7 @@ class Path {
 			points.unshift(current.pos);
 			current = candidates[current.prev.y][current.prev.x];
 		}
+		points.unshift(start);
 
 		return new Path(points);
 	}
@@ -255,10 +256,11 @@ class Path {
 		// otherwise reconstruct the path
 		var points: Array<IntPoint> = [];
 		var current = candidates[end.y][end.x];
-		while (current.prev != null) {
+		while (current.pos != start) {
 			points.unshift(current.pos);
 			current = candidates[current.prev.y][current.prev.x];
 		}
+		points.unshift(start);
 
 		return new Path(points);
 	}

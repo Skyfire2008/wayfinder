@@ -68,12 +68,14 @@
 				<!-- /ko -->
 
 				<!-- ko foreach: path() -->
-				<use class="noMouseEvents" href="#path" data-bind="
+				<line stroke="#ff0000" stroke-linecap="round" stroke-width="5" class="noMouseEvents" data-bind="
 					attr: {
-						x: $data.x*$root.tileWidth,
-						y: $data.y*$root.tileHeight
+						x1: ($data.a.x+0.5) * $root.tileWidth,
+						y1: ($data.a.y+0.5) * $root.tileHeight,
+						x2: ($data.b.x+0.5) * $root.tileWidth,
+						y2: ($data.b.y+0.5) * $root.tileHeight
 					}
-				"></use>
+				"></line>
 				<!-- /ko -->
 
 				<!-- ko if: startPos() -->
@@ -113,7 +115,8 @@
 			<button data-bind="click: setStart">Set start</button>
 			<button data-bind="click: setEnd">Set end</button>
 			<button data-bind="click: genNavMesh">Generate nav mesh</button>
-			<button data-bind="click: findPath">Find path</button>
+			<button data-bind="click: findAPath">Find A* path</button>
+			<button data-bind="click: findThetaPath">Find θ* path</button>
 		</div>
 
 	</div>
