@@ -24,3 +24,28 @@ class IntIterator {
 		return result;
 	}
 }
+
+class RevIntIterator {
+	private var min: Int;
+	private var max: Int;
+	private var step: Int;
+
+	private var current: Int;
+
+	public function new(max: Int, min: Int, step: Int) {
+		this.min = min;
+		this.max = max;
+		this.step = step;
+		current = max;
+	}
+
+	public inline function hasNext(): Bool {
+		return current >= min;
+	}
+
+	public inline function next(): Int {
+		var result = current;
+		current += step;
+		return result;
+	}
+}

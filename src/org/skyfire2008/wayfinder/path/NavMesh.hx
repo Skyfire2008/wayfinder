@@ -1,9 +1,11 @@
 package org.skyfire2008.wayfinder.path;
 
 import org.skyfire2008.wayfinder.geom.Point;
+import org.skyfire2008.wayfinder.geom.IntPoint;
+import org.skyfire2008.wayfinder.geom.Rectangle;
+import org.skyfire2008.wayfinder.util.IntIterator.RevIntIterator;
 import org.skyfire2008.wayfinder.util.Tuple;
 import org.skyfire2008.wayfinder.util.Util;
-import org.skyfire2008.wayfinder.geom.Rectangle;
 
 using Lambda;
 
@@ -94,6 +96,80 @@ class NavMesh {
 		return result;
 	}
 
+	public static function makeNavMeshImproved(walls: Array<Array<Bool>>, tileWidth: Float, tileHeight: Float): NavMesh {
+		var width = walls[0].length;
+		var height = walls.length;
+
+		// init heights array
+		var heights: Array<Array<Int>> = [];
+		for (y in 0...height) {
+			var curArray: Array<Int> = [];
+			for (x in 0...width) {
+				curArray.push(0);
+			}
+			heights.push(curArray);
+		}
+
+		// calculate heights
+		for (x in 0...width) {
+			for (y in new RevIntIterator(height - 1, 0, -1)) {
+				if (walls[y][x]) {
+					heights[y][x] = 0;
+				} else {
+					if (y == height - 1) {
+						heights[y][x] = 1;
+					} else {
+						heights[y][x] = heights[y + 1][x] + 1;
+					}
+				}
+			}
+		}
+
+		// calculate next smaller elements
+		var nse = heights.map((row) -> Util.getNse(row));
+
+		// use distances to calculate max rectangles for every tile, while using it as origin
+		var maxRegions: Array<Array<Region>> = [];
+		for (y in 0...height) {
+			var currentRow: Array<Region> = [];
+			maxRegions.push(currentRow);
+
+			for (x in 0...width) {
+				var isWall = walls[y][x];
+				if (!isWall) {
+
+					var bestWidth = 0;
+					var bestHeight = 0;
+					var bestArea = 0;
+
+					// iterate through next smaller elements to find rectangle with largest area originating in this point
+					var i = x;
+					while (i != width) {
+						var curWidth = nse[y][i] - x;
+						var curHeight = heights[y][i];
+						var curArea = curWidth * curHeight;
+
+						if (curArea > bestArea) {
+							bestWidth = curWidth;
+							bestHeight = curHeight;
+							bestArea = curArea;
+						}
+
+						i = nse[y][i];
+					}
+
+					currentRow.push(new Region(x, y, bestWidth, bestHeight));
+				} else {
+					currentRow.push(null);
+				}
+			}
+		}
+
+		trace(maxRegions);
+
+		return null;
+	}
+
 	public static function makeNavMesh(walls: Array<Array<Bool>>, tileWidth: Float, tileHeight: Float): NavMesh {
 		var width = walls[0].length;
 		var height = walls.length;
@@ -134,17 +210,6 @@ class NavMesh {
 		result = new NavMesh(regionList.map(function(elem: Region) {
 			return elem.toRect(tileWidth, tileHeight);
 		}));
-
-		// debug print
-		/*var ids = regions.map(function(line: Array<Region>) {
-				return line.map(function(r: Region) {
-					return r != null ? '${r.id}' : " ";
-				});
-			});
-
-			ids.iter(function(item: Array<String>) {
-				trace(item);
-		});*/
 
 		// now get the region exits
 		var x = 0;

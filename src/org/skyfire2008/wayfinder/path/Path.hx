@@ -58,7 +58,7 @@ class Path {
 	public var points: Array<IntPoint>;
 
 	/**
-	 * Distance heuristic for A*(Manhattan distance)
+	 * Distance heuristic for A*
 	 * @param start 
 	 * @param end 
 	 * @return Int
@@ -248,7 +248,7 @@ class Path {
 			}
 		}
 
-		// check tha path is found
+		// check that path is found
 		if (!candidates[end.y][end.x].closed) {
 			throw "End unreachable";
 		}

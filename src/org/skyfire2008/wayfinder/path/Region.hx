@@ -36,6 +36,16 @@ class Region {
 		return id == other.id;
 	}
 
+	public function setWidth(width: Int) {
+		this.width = width;
+		this.area = width * height;
+	}
+
+	public function setHeight(height: Int) {
+		this.height = height;
+		this.area = width * height;
+	}
+
 	// GETTERS AND SETTERS
 	private inline function get_right(): Int {
 		return x + width;

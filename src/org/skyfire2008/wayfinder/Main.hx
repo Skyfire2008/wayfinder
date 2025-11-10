@@ -1,7 +1,5 @@
 package org.skyfire2008.wayfinder;
 
-import org.skyfire2008.wayfinder.mapGen.Random;
-
 import js.html.MouseEvent;
 import js.Browser;
 
@@ -9,9 +7,11 @@ import org.skyfire2008.wayfinder.geom.IntPoint;
 import org.skyfire2008.wayfinder.path.NavMesh;
 import org.skyfire2008.wayfinder.path.Map;
 import org.skyfire2008.wayfinder.path.Path;
+import org.skyfire2008.wayfinder.mapGen.Random;
 import org.skyfire2008.wayfinder.mapGen.Generator;
 import org.skyfire2008.wayfinder.mapGen.Cave;
 import org.skyfire2008.wayfinder.mapGen.Maze;
+import org.skyfire2008.wayfinder.util.Util;
 
 import knockout.Knockout;
 import knockout.Observable;
@@ -122,6 +122,16 @@ class ViewModel {
 		this.navMesh.set(NavMesh.makeNavMesh(walls, this.tileWidth, this.tileHeight));
 	}
 
+	public function genNavMeshImproved() {
+		var walls = this.walls.get().map(function(line) {
+			return line.map(function(elem) {
+				return elem.get();
+			});
+		});
+
+		this.navMesh.set(NavMesh.makeNavMeshImproved(walls, this.tileWidth, this.tileHeight));
+	}
+
 	public function generateMap() {
 		var width = this.tempWidth.get();
 		var height = this.tempHeight.get();
@@ -206,10 +216,12 @@ class ViewModel {
 class Main {
 	public static function main() {
 		Browser.window.addEventListener("load", init);
+
+		// trace(Util.getNse([0, 4, 4, 4, 9, 6, 2, 2, 9, 2, 0]));
 	}
 
 	public static function init() {
-		var viewModel = new ViewModel(59, 59, 20, 20);
+		var viewModel = new ViewModel(59, 59, 16, 16);
 		Knockout.applyBindings(viewModel);
 	}
 }
