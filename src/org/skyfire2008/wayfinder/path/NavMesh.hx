@@ -1,5 +1,7 @@
 package org.skyfire2008.wayfinder.path;
 
+import polygonal.ds.PriorityQueue;
+
 import org.skyfire2008.wayfinder.geom.Point;
 import org.skyfire2008.wayfinder.geom.IntPoint;
 import org.skyfire2008.wayfinder.geom.Rectangle;
@@ -130,6 +132,7 @@ class NavMesh {
 
 		// use distances to calculate max rectangles for every tile, while using it as origin
 		var maxRegions: Array<Array<Region>> = [];
+		var queue = new PriorityQueue<Region>();
 		for (y in 0...height) {
 			var currentRow: Array<Region> = [];
 			maxRegions.push(currentRow);
@@ -158,16 +161,62 @@ class NavMesh {
 						i = nse[y][i];
 					}
 
-					currentRow.push(new Region(x, y, bestWidth, bestHeight));
+					// add region to array and queue
+					var region = new Region(x, y, bestWidth, bestHeight);
+					currentRow.push(region);
+					queue.enqueue(region);
 				} else {
 					currentRow.push(null);
 				}
 			}
 		}
 
-		trace(maxRegions);
+		// TODO: implement quadtree to manage added regions
+		var addedRegions: Array<Region> = [];
+		// fetch regions from priority queue
+		while (!queue.empty()) {
+			var region = queue.dequeue();
 
-		return null;
+			var skip = false;
+			var requeue = false;
+			for (current in addedRegions) {
+				// if region's origin is already covered, skip
+				if (current.contains(region.x, region.y)) {
+					skip = true;
+					break;
+				}
+
+				// if it only intersects, recalculate the region
+				if (current.intersects(region)) {
+					requeue = true;
+
+					var newWidth = current.x - region.x;
+					var newHeight = current.y - region.y;
+					if (newWidth * region.height > newHeight * region.width) {
+						region.setWidth(newWidth);
+					} else {
+						region.setHeight(newHeight);
+					}
+				}
+			}
+
+			if (skip) {
+				continue;
+			}
+
+			if (requeue) {
+				queue.enqueue(region);
+				continue;
+			}
+
+			addedRegions.push(region);
+		}
+
+		var result = new NavMesh(addedRegions.map(function(elem: Region) {
+			return elem.toRect(tileWidth, tileHeight);
+		}));
+
+		return result;
 	}
 
 	public static function makeNavMesh(walls: Array<Array<Bool>>, tileWidth: Float, tileHeight: Float): NavMesh {

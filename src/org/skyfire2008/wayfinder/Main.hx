@@ -216,8 +216,6 @@ class ViewModel {
 class Main {
 	public static function main() {
 		Browser.window.addEventListener("load", init);
-
-		// trace(Util.getNse([0, 4, 4, 4, 9, 6, 2, 2, 9, 2, 0]));
 	}
 
 	public static function init() {
