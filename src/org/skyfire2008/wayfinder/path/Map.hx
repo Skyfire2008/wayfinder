@@ -10,14 +10,15 @@ class Map {
 	public var width(get, null): Int;
 	public var height(get, null): Int;
 
-	public var navMesh: NavMesh;
+	// TODO: what is this for?
+	// public var navMesh: NavMesh;
 
 	public function new(walls: Array<Array<Bool>>, tileWidth: Float, tileHeight: Float) {
 		this.walls = walls;
 		this.tileWidth = tileWidth;
 		this.tileHeight = tileHeight;
 
-		this.navMesh = NavMesh.makeNavMesh(walls, tileWidth, tileHeight);
+		// this.navMesh = NavMesh.makeNavMesh(walls, tileWidth, tileHeight);
 	}
 
 	/**
@@ -30,7 +31,7 @@ class Map {
 		// this is a special case since points are integer, so no taking care of different positions inside a cell is necessary
 		var stepX = p1.x > p0.x ? 1 : -1;
 		var stepY = p1.y > p0.y ? 1 : -1;
-		var v: IntPoint = {x: p1.x - p0.x, y: p1.y - p0.y};
+		var v: IntPoint = new IntPoint(p1.x - p0.x, p1.y - p0.y);
 
 		var tDeltaX = stepX / v.x;
 		var tDeltaY = stepY / v.y;

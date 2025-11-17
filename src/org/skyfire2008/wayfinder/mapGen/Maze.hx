@@ -56,8 +56,8 @@ class Maze implements Generator {
 		// init
 		added[0][0] = true;
 		var passageQueue = new PriorityQueue<Passage>();
-		passageQueue.enqueue(new Passage({x: 1, y: 0}, {x: 2, y: 0}, Math.random()));
-		passageQueue.enqueue(new Passage({x: 0, y: 1}, {x: 0, y: 2}, Math.random()));
+		passageQueue.enqueue(new Passage(new IntPoint(1, 0), new IntPoint(2, 0), Math.random()));
+		passageQueue.enqueue(new Passage(new IntPoint(0, 1), new IntPoint(0, 2), Math.random()));
 		while (!passageQueue.isEmpty()) {
 			var passage = passageQueue.dequeue();
 			if (isAdded(passage.next)) {
@@ -72,33 +72,33 @@ class Maze implements Generator {
 			}
 
 			if (passage.next.x + 2 < width) {
-				var next: IntPoint = {x: passage.next.x + 2, y: passage.next.y};
+				var next: IntPoint = new IntPoint(passage.next.x + 2, passage.next.y);
 				if (!isAdded(next)) {
-					var pos = {x: passage.next.x + 1, y: passage.next.y};
+					var pos = new IntPoint(passage.next.x + 1, passage.next.y);
 					passageQueue.enqueue(new Passage(pos, next, getProb(pos, true)));
 				}
 			}
 
 			if (passage.next.y + 2 < height) {
-				var next: IntPoint = {x: passage.next.x, y: passage.next.y + 2};
+				var next: IntPoint = new IntPoint(passage.next.x, passage.next.y + 2);
 				if (!isAdded(next)) {
-					var pos = {x: passage.next.x, y: passage.next.y + 1};
+					var pos = new IntPoint(passage.next.x, passage.next.y + 1);
 					passageQueue.enqueue(new Passage(pos, next, getProb(pos, false)));
 				}
 			}
 
 			if (passage.next.x - 2 >= 0) {
-				var next: IntPoint = {x: passage.next.x - 2, y: passage.next.y};
+				var next: IntPoint = new IntPoint(passage.next.x - 2, passage.next.y);
 				if (!isAdded(next)) {
-					var pos = {x: passage.next.x - 1, y: passage.next.y};
+					var pos = new IntPoint(passage.next.x - 1, passage.next.y);
 					passageQueue.enqueue(new Passage(pos, next, getProb(pos, true)));
 				}
 			}
 
 			if (passage.next.y - 2 >= 0) {
-				var next: IntPoint = {x: passage.next.x, y: passage.next.y - 2};
+				var next: IntPoint = new IntPoint(passage.next.x, passage.next.y - 2);
 				if (!isAdded(next)) {
-					var pos = {x: passage.next.x, y: passage.next.y - 1};
+					var pos = new IntPoint(passage.next.x, passage.next.y - 1);
 					passageQueue.enqueue(new Passage(pos, next, getProb(pos, false)));
 				}
 			}

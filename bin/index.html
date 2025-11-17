@@ -98,8 +98,12 @@
 
 				<!-- ko if: navMesh() -->
 				<!-- ko foreach: navMesh().nodes -->
-				<rect stroke="red" fill="none"
-					data-bind="attr: {x: $data.x, y: $data.y, width: $data.width, height: $data.height}">
+				<rect stroke="red" fill="none" data-bind="attr: {
+						x: $data.rect.x * $root.tileWidth, 
+						y: $data.rect.y * $root.tileWidth, 
+						width: $data.rect.width * $root.tileWidth, 
+						height: $data.rect.height * $root.tileWidth
+					}">
 				</rect>
 				<!-- /ko -->
 				<!-- /ko -->

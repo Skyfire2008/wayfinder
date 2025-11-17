@@ -52,14 +52,14 @@ class Cave implements Generator {
 
 				for (x in 0...width) {
 					var neighbors: Array<IntPoint> = [
-						{x: x - 1, y: y - 1},
-						{x: x, y: y - 1},
-						{x: x + 1, y: y - 1},
-						{x: x - 1, y: y},
-						{x: x + 1, y: y},
-						{x: x - 1, y: y + 1},
-						{x: x, y: y + 1},
-						{x: x + 1, y: y + 1},
+						new IntPoint(x - 1, y - 1),
+						new IntPoint(x, y - 1),
+						new IntPoint(x + 1, y - 1),
+						new IntPoint(x - 1, y),
+						new IntPoint(x + 1, y),
+						new IntPoint(x - 1, y + 1),
+						new IntPoint(x, y + 1),
+						new IntPoint(x + 1, y + 1)
 					];
 
 					var count: Int = 0;

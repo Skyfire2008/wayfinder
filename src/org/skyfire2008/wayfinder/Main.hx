@@ -90,11 +90,11 @@ class ViewModel {
 		var isWall = walls.get()[y][x];
 
 		if (settingStart.get()) {
-			startPos.set({x: x, y: y});
+			startPos.set(new IntPoint(x, y));
 			settingStart.set(false);
 
 		} else if (settingEnd.get()) {
-			endPos.set({x: x, y: y});
+			endPos.set(new IntPoint(x, y));
 			settingEnd.set(false);
 
 		} else {
@@ -119,7 +119,7 @@ class ViewModel {
 				return elem.get();
 			});
 		});
-		this.navMesh.set(NavMesh.makeNavMesh(walls, this.tileWidth, this.tileHeight));
+		this.navMesh.set(new NavMesh(walls));
 	}
 
 	public function genNavMeshImproved() {
@@ -129,7 +129,7 @@ class ViewModel {
 			});
 		});
 
-		this.navMesh.set(NavMesh.makeNavMeshImproved(walls, this.tileWidth, this.tileHeight));
+		this.navMesh.set(new NavMesh(walls, true));
 	}
 
 	public function generateMap() {

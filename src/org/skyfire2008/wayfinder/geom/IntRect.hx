@@ -1,14 +1,8 @@
-package org.skyfire2008.wayfinder.path;
+package org.skyfire2008.wayfinder.geom;
 
 import polygonal.ds.Prioritizable;
 
-import org.skyfire2008.wayfinder.geom.Rectangle;
-
-/**
- * Represents a part of navmesh, rectangular region on map in tile coordinates
- */
-class Region implements Prioritizable {
-	public var id(default, null): Int;
+class IntRect implements Prioritizable {
 	public var x(default, null): Int;
 	public var y(default, null): Int;
 	public var width(default, null): Int;
@@ -34,25 +28,14 @@ class Region implements Prioritizable {
 		this.priority = area;
 	}
 
-	public function setId(id: Int) {
-		this.id = id;
-	}
-
 	public inline function contains(x: Int, y: Int): Bool {
 		return this.x <= x && this.right > x && this.y <= y && this.bottom > y;
 	}
 
-	public inline function intersects(other: Region): Bool {
+	public inline function intersects(other: IntRect): Bool {
 		return other.x < this.right && this.x < other.right && other.y < this.bottom && this.y < other.bottom;
 	}
 
-	public function toRect(tileWidth: Float, tileHeight: Float): Rectangle {
-		return new Rectangle(x * tileWidth, y * tileHeight, width * tileWidth, height * tileHeight);
-	}
-
-	/*public function equals(other: Region): Bool {
-		return id == other.id;
-	}*/
 	public function setWidth(width: Int) {
 		this.width = width;
 		right = x + width;

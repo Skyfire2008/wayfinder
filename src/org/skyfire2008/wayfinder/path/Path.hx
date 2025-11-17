@@ -86,7 +86,7 @@ class Path {
 		for (y in 0...map.height) {
 			var current: Array<Candidate> = [];
 			for (x in 0...map.width) {
-				var candidate = new Candidate({x: x, y: y}, null, 0, Math.POSITIVE_INFINITY);
+				var candidate = new Candidate(new IntPoint(x, y), null, 0, Math.POSITIVE_INFINITY);
 				current.push(candidate);
 				if (map.isPointWall(candidate.pos)) {
 					candidate.closed = true;
@@ -105,10 +105,10 @@ class Path {
 			current.closed = true;
 
 			var candidatePositions: Array<IntPoint> = [
-				{x: current.x + 1, y: current.y},
-				{x: current.x, y: current.y + 1},
-				{x: current.x - 1, y: current.y},
-				{x: current.x, y: current.y - 1},
+				new IntPoint(current.x + 1, current.y),
+				new IntPoint(current.x, current.y + 1),
+				new IntPoint(current.x - 1, current.y),
+				new IntPoint(current.x, current.y - 1),
 			];
 			for (pos in candidatePositions) {
 				// found
@@ -191,7 +191,7 @@ class Path {
 		for (y in 0...map.height) {
 			var current: Array<Candidate> = [];
 			for (x in 0...map.width) {
-				var candidate = new Candidate({x: x, y: y}, null, 0, Math.POSITIVE_INFINITY);
+				var candidate = new Candidate(new IntPoint(x, y), null, 0, Math.POSITIVE_INFINITY);
 				current.push(candidate);
 				if (map.isPointWall(candidate.pos)) {
 					candidate.closed = true;
@@ -210,10 +210,10 @@ class Path {
 			current.closed = true;
 
 			var candidatePositions: Array<IntPoint> = [
-				{x: current.x + 1, y: current.y},
-				{x: current.x, y: current.y + 1},
-				{x: current.x - 1, y: current.y},
-				{x: current.x, y: current.y - 1},
+				new IntPoint(current.x + 1, current.y),
+				new IntPoint(current.x, current.y + 1),
+				new IntPoint(current.x - 1, current.y),
+				new IntPoint(current.x, current.y - 1)
 			];
 			for (pos in candidatePositions) {
 				// skip positions out of bounds

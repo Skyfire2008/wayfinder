@@ -2,103 +2,123 @@ package org.skyfire2008.wayfinder.path;
 
 import polygonal.ds.PriorityQueue;
 
-import org.skyfire2008.wayfinder.geom.Point;
 import org.skyfire2008.wayfinder.geom.IntPoint;
-import org.skyfire2008.wayfinder.geom.Rectangle;
+import org.skyfire2008.wayfinder.geom.IntRect;
 import org.skyfire2008.wayfinder.util.IntIterator.RevIntIterator;
-import org.skyfire2008.wayfinder.util.Tuple;
 import org.skyfire2008.wayfinder.util.Util;
 
 using Lambda;
 
-typedef Edge = Tuple<Int, Exit>;
-
 class NavMesh {
-	public var nodes: Array<Rectangle>;
+	private var nodes: Array<Node>;
 
-	public var adjacencies: Array<Array<Edge>>;
+	private var nodeGrid: Array<Array<Int>>;
 
-	public function new(nodes: Array<Rectangle>) {
-		this.nodes = nodes;
-		this.adjacencies = [for (i in 0...nodes.length) []];
-	}
+	/**
+	 * Creates a new nav mesh from wall array
+	 * @param walls 		wall array
+	 * @param useGlobal 	if enabled, will use a different algorithm for rectangle decomposition
+	 */
+	public function new(walls: Array<Array<Bool>>, useGlobal: Bool = false) {
+		var width = walls[0].length;
+		var height = walls.length;
 
-	public function addEdge(from: Int, to: Int, exit: Exit) {
-		adjacencies[from].push(new Edge(to, exit));
-		adjacencies[to].push(new Edge(from, exit));
-	}
+		// perform the rectangle decomposition and get nodes
+		var rects = useGlobal ? NavMesh.wallsToRectsGlobal(walls) : NavMesh.wallsToRects(walls);
 
-	private static function addEdgePrivate(mesh: NavMesh, from: Int, to: Int, exit: Exit): Bool {
-		var result = to > from;
-		if (result) {
-			mesh.addEdge(from, to, exit);
+		this.nodes = [];
+		this.nodeGrid = [for (y in 0...height) [for (x in 0...width) null]];
+		for (rect in rects) {
+			var node = new Node(rect, []);
+			for (x in rect.x...rect.right) {
+				for (y in rect.y...rect.bottom) {
+					nodeGrid[y][x] = nodes.length;
+				}
+			}
+			nodes.push(node);
 		}
-		return result;
+
+		// now get the edges between nodes
+		var x = 0;
+		var y = 0;
+		for (node in nodes) {
+			// right
+			if (node.rect.right < width) {
+				x = node.rect.right;
+				y = node.rect.y;
+				while (y < node.rect.bottom) {
+					if (walls[y][x]) {
+						y++;
+					} else {
+						var other = nodes[nodeGrid[y][x]];
+						var y0 = Util.max(node.rect.y, other.rect.y);
+						var y1 = Util.min(node.rect.bottom, other.rect.bottom);
+						y = y1;
+						// NavMesh.addEdgePrivate(result, region.id, other.id, new Exit(new Point(x, y0), new Point(x, y1)));
+					}
+				}
+			}
+
+			// bottom
+			if (node.rect.bottom < height) {
+				x = node.rect.x;
+				y = node.rect.bottom;
+				while (x < node.rect.right) {
+					if (walls[y][x]) {
+						x++;
+					} else {
+						var other = nodes[nodeGrid[y][x]];
+						var x0 = Util.max(node.rect.x, other.rect.x);
+						var x1 = Util.min(node.rect.right, other.rect.right);
+						x = x1;
+						// NavMesh.addEdgePrivate(result, region.id, other.id, new Exit(new Point(x0, y), new Point(x1, y)));
+					}
+				}
+			}
+
+			// left
+			if (node.rect.x > 0) {
+				x = node.rect.x - 1;
+				y = node.rect.y;
+				while (y < node.rect.bottom) {
+					if (walls[y][x]) {
+						y++;
+					} else {
+						var other = nodes[nodeGrid[y][x]];
+						var y0 = Util.max(node.rect.y, other.rect.y);
+						var y1 = Util.min(node.rect.bottom, other.rect.bottom);
+						y = y1;
+						// NavMesh.addEdgePrivate(result, region.id, other.id, new Exit(new Point(x, y0), new Point(x, y1)));
+					}
+				}
+			}
+
+			// top
+			if (node.rect.y > 0) {
+				x = node.rect.x;
+				y = node.rect.y - 1;
+				while (x < node.rect.right) {
+					if (walls[y][x]) {
+						x++;
+					} else {
+						var other = nodes[nodeGrid[y][x]];
+						var x0 = Util.max(node.rect.x, other.rect.x);
+						var x1 = Util.min(node.rect.right, other.rect.right);
+						x = x1;
+						// NavMesh.addEdgePrivate(result, region.id, other.id, new Exit(new Point(x0, y), new Point(x1, y)));
+					}
+				}
+			}
+		}
+
 	}
 
 	/**
-	 * Creates a new region at given starting coordinates
-	 * @param startX left coordinate
-	 * @param startY top coordiante
-	 * @param regions 2d array of tiles occupied by regions
-	 * @param tiles 2d array of walls
-	 * @return Region
+	 * Decomposes the level into rectangles using a greedy algorithm selecting the best global rectangle first
+	 * @param walls 		2d array fo walls
+	 * @return Array<IntRect>
 	 */
-	public static function makeRegion(startX: Int, startY: Int, regions: Array<Array<Region>>, tiles: Array<Array<Bool>>): Region {
-		var maxArea = 0;
-		var maxAreaWidth = 0;
-		var maxAreaHeight = 0;
-		var maxWidth = tiles[0].length - startX;
-
-		var j = 0;
-		var curHeight = 1;
-		var completed = false;
-		// process line-by-line while not completed
-		while (!completed && j + startY < tiles.length) {
-			var currentArea = 0;
-
-			// for every line, process max possible width
-			for (i in 0...maxWidth) {
-				var x = i + startX;
-				var y = j + startY;
-				// if current tile is not wall and not occupied by region
-				if (!tiles[y][x] && regions[y][x] == null) {
-					// increment current area by current height
-					currentArea += curHeight;
-					// if current area greater than maximum area, update maximum area and its location
-					if (currentArea > maxArea) {
-						maxArea = currentArea;
-						maxAreaWidth = i + 1;
-						maxAreaHeight = curHeight;
-					}
-					// if current tile is wall or occupied
-				} else {
-					// decrease max width
-					maxWidth = i;
-					if (maxWidth == 0) {
-						completed = true;
-					}
-					break;
-				}
-			}
-			j++;
-			curHeight++;
-		}
-
-		// TODO: region 2d array should only contain indices of regions in region array
-		var result = new Region(startX, startY, maxAreaWidth, maxAreaHeight);
-		// occupy the cells in regions array
-		for (i in 0...maxAreaWidth) {
-			for (j in 0...maxAreaHeight) {
-				var x = i + startX;
-				var y = j + startY;
-				regions[y][x] = result;
-			}
-		}
-		return result;
-	}
-
-	public static function makeNavMeshImproved(walls: Array<Array<Bool>>, tileWidth: Float, tileHeight: Float): NavMesh {
+	public static function wallsToRectsGlobal(walls: Array<Array<Bool>>): Array<IntRect> {
 		var width = walls[0].length;
 		var height = walls.length;
 
@@ -131,11 +151,11 @@ class NavMesh {
 		var nse = heights.map((row) -> Util.getNse(row));
 
 		// use distances to calculate max rectangles for every tile, while using it as origin
-		var maxRegions: Array<Array<Region>> = [];
-		var queue = new PriorityQueue<Region>();
+		var maxRects: Array<Array<IntRect>> = [];
+		var queue = new PriorityQueue<IntRect>();
 		for (y in 0...height) {
-			var currentRow: Array<Region> = [];
-			maxRegions.push(currentRow);
+			var currentRow: Array<IntRect> = [];
+			maxRects.push(currentRow);
 
 			for (x in 0...width) {
 				var isWall = walls[y][x];
@@ -161,41 +181,41 @@ class NavMesh {
 						i = nse[y][i];
 					}
 
-					// add region to array and queue
-					var region = new Region(x, y, bestWidth, bestHeight);
-					currentRow.push(region);
-					queue.enqueue(region);
+					// add rect to array and queue
+					var rect = new IntRect(x, y, bestWidth, bestHeight);
+					currentRow.push(rect);
+					queue.enqueue(rect);
 				} else {
 					currentRow.push(null);
 				}
 			}
 		}
 
-		// TODO: implement quadtree to manage added regions
-		var addedRegions: Array<Region> = [];
-		// fetch regions from priority queue
+		// TODO: implement quadtree to manage added rects
+		var addedRects: Array<IntRect> = [];
+		// fetch rects from priority queue
 		while (!queue.empty()) {
-			var region = queue.dequeue();
+			var rect = queue.dequeue();
 
 			var skip = false;
 			var requeue = false;
-			for (current in addedRegions) {
-				// if region's origin is already covered, skip
-				if (current.contains(region.x, region.y)) {
+			for (current in addedRects) {
+				// if rect's origin is already covered, skip
+				if (current.contains(rect.x, rect.y)) {
 					skip = true;
 					break;
 				}
 
-				// if it only intersects, recalculate the region
-				if (current.intersects(region)) {
+				// if it only intersects, recalculate the rect
+				if (current.intersects(rect)) {
 					requeue = true;
 
-					var newWidth = current.x - region.x;
-					var newHeight = current.y - region.y;
-					if (newWidth * region.height > newHeight * region.width) {
-						region.setWidth(newWidth);
+					var newWidth = current.x - rect.x;
+					var newHeight = current.y - rect.y;
+					if (newWidth * rect.height > newHeight * rect.width) {
+						rect.setWidth(newWidth);
 					} else {
-						region.setHeight(newHeight);
+						rect.setHeight(newHeight);
 					}
 				}
 			}
@@ -205,48 +225,106 @@ class NavMesh {
 			}
 
 			if (requeue) {
-				queue.enqueue(region);
+				queue.enqueue(rect);
 				continue;
 			}
 
-			addedRegions.push(region);
+			addedRects.push(rect);
 		}
 
-		var result = new NavMesh(addedRegions.map(function(elem: Region) {
-			return elem.toRect(tileWidth, tileHeight);
-		}));
+		return addedRects;
+	}
 
+	/**
+	 * Helper function, creates a largest possible rectangle at given coordinates
+	 * @param startX left coordinate
+	 * @param startY top coordiante
+	 * @param rects  2d array of tiles occupied by rectangles
+	 * @param tiles 2d array of walls
+	 * @return IntRect
+	 */
+	private static function makeRect(startX: Int, startY: Int, rects: Array<Array<IntRect>>, tiles: Array<Array<Bool>>): IntRect {
+		var maxArea = 0;
+		var maxAreaWidth = 0;
+		var maxAreaHeight = 0;
+		var maxWidth = tiles[0].length - startX;
+
+		var j = 0;
+		var curHeight = 1;
+		var completed = false;
+		// process line-by-line while not completed
+		while (!completed && j + startY < tiles.length) {
+			var currentArea = 0;
+
+			// for every line, process max possible width
+			for (i in 0...maxWidth) {
+				var x = i + startX;
+				var y = j + startY;
+				// if current tile is not wall and not occupied by a rectangle
+				if (!tiles[y][x] && rects[y][x] == null) {
+					// increment current area by current height
+					currentArea += curHeight;
+					// if current area greater than maximum area, update maximum area and its location
+					if (currentArea > maxArea) {
+						maxArea = currentArea;
+						maxAreaWidth = i + 1;
+						maxAreaHeight = curHeight;
+					}
+					// if current tile is wall or occupied
+				} else {
+					// decrease max width
+					maxWidth = i;
+					if (maxWidth == 0) {
+						completed = true;
+					}
+					break;
+				}
+			}
+			j++;
+			curHeight++;
+		}
+
+		var result = new IntRect(startX, startY, maxAreaWidth, maxAreaHeight);
+		// occupy the cells in rects array
+		for (i in 0...maxAreaWidth) {
+			for (j in 0...maxAreaHeight) {
+				var x = i + startX;
+				var y = j + startY;
+				rects[y][x] = result;
+			}
+		}
 		return result;
 	}
 
-	public static function makeNavMesh(walls: Array<Array<Bool>>, tileWidth: Float, tileHeight: Float): NavMesh {
+	/**
+	 * Decomposes the level into rectangles by processing the tiles left->right and top->bottom and occupying largest possible rectangle 
+	 * @param walls 		2d array fo walls
+	 * @return Array<IntRect>
+	 */
+	public static function wallsToRects(walls: Array<Array<Bool>>): Array<IntRect> {
 		var width = walls[0].length;
 		var height = walls.length;
 
-		var result: NavMesh = null;
-
-		// 2d array, showing where regions are located
-		var regions: Array<Array<Region>> = [for (y in 0...height) [for (x in 0...width) null]];
+		// 2d array, showing where rects are located
+		var rects: Array<Array<IntRect>> = [for (y in 0...height) [for (x in 0...width) null]];
 		var y = 0;
-		var regionList = new Array<Region>();
+		var rectList = new Array<IntRect>();
 
-		// generate the regions
+		// generate the rectangles
 		while (y < height) {
 			var x = 0;
 			while (x < width) {
 				// if current tile is empty
 				if (!walls[y][x]) {
-					var tileRegion = regions[y][x];
-					// if current tile not occupied by region
-					if (tileRegion == null) {
-						var region = NavMesh.makeRegion(x, y, regions, walls);
-						// trace('made region $region');
-						regionList.push(region);
-						region.setId(regionList.length - 1);
-						x += region.width;
+					var tileRect = rects[y][x];
+					// if current tile not occupied by rect
+					if (tileRect == null) {
+						var rect = NavMesh.makeRect(x, y, rects, walls);
+						rectList.push(rect);
+						x += rect.width;
 						// otherwise
 					} else {
-						x += regions[y][x].width;
+						x += rects[y][x].width;
 					}
 					// if current tile is a wall
 				} else {
@@ -256,87 +334,7 @@ class NavMesh {
 			y++;
 		}
 
-		result = new NavMesh(regionList.map(function(elem: Region) {
-			return elem.toRect(tileWidth, tileHeight);
-		}));
-
-		// now get the region exits
-		var x = 0;
-		var y = 0;
-		for (region in regionList) {
-			// right
-			if (region.right < width) {
-				x = region.right;
-				y = region.y;
-				while (y < region.bottom) {
-					if (walls[y][x]) {
-						y++;
-					} else {
-						var other = regions[y][x];
-						var y0 = Util.max(region.y, other.y);
-						var y1 = Util.min(region.bottom, other.bottom);
-						y = y1;
-						NavMesh.addEdgePrivate(result, region.id, other.id, new Exit(new Point(x, y0), new Point(x, y1)));
-						// trace('regions ${region.id} and ${other.id} border at x=${region.right} y=($y0, $y1)');
-					}
-				}
-			}
-
-			// bottom
-			if (region.bottom < height) {
-				x = region.x;
-				y = region.bottom;
-				while (x < region.right) {
-					if (walls[y][x]) {
-						x++;
-					} else {
-						var other = regions[y][x];
-						var x0 = Util.max(region.x, other.x);
-						var x1 = Util.min(region.right, other.right);
-						x = x1;
-						NavMesh.addEdgePrivate(result, region.id, other.id, new Exit(new Point(x0, y), new Point(x1, y)));
-						// trace('regions ${region.id} and ${other.id} border at x=($x0, $x1) y=${region.bottom}');
-					}
-				}
-			}
-
-			// left
-			if (region.x > 0) {
-				x = region.x - 1;
-				y = region.y;
-				while (y < region.bottom) {
-					if (walls[y][x]) {
-						y++;
-					} else {
-						var other = regions[y][x];
-						var y0 = Util.max(region.y, other.y);
-						var y1 = Util.min(region.bottom, other.bottom);
-						y = y1;
-						NavMesh.addEdgePrivate(result, region.id, other.id, new Exit(new Point(x, y0), new Point(x, y1)));
-						// trace('regions ${region.id} and ${other.id} border at x=${region.x} y=($y0, $y1)');
-					}
-				}
-			}
-
-			// top
-			if (region.y > 0) {
-				x = region.x;
-				y = region.y - 1;
-				while (x < region.right) {
-					if (walls[y][x]) {
-						x++;
-					} else {
-						var other = regions[y][x];
-						var x0 = Util.max(region.x, other.x);
-						var x1 = Util.min(region.right, other.right);
-						x = x1;
-						NavMesh.addEdgePrivate(result, region.id, other.id, new Exit(new Point(x0, y), new Point(x1, y)));
-						// trace('regions ${region.id} and ${other.id} border at x=($x0, $x1) y=${region.y}');
-					}
-				}
-			}
-		}
-
-		return result;
+		return rectList;
 	}
+
 }
