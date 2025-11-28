@@ -7,6 +7,8 @@ import org.skyfire2008.wayfinder.geom.IntPoint;
 import org.skyfire2008.wayfinder.path.NavMesh;
 import org.skyfire2008.wayfinder.path.Map;
 import org.skyfire2008.wayfinder.path.Path;
+import org.skyfire2008.wayfinder.path.Pathfinder.AStar;
+import org.skyfire2008.wayfinder.path.GridGraph;
 import org.skyfire2008.wayfinder.mapGen.Random;
 import org.skyfire2008.wayfinder.mapGen.Generator;
 import org.skyfire2008.wayfinder.mapGen.Cave;
@@ -171,6 +173,47 @@ class ViewModel {
 
 	public function findThetaPath() {
 		findPath(Path.findThetaStar);
+	}
+
+	public function findAPathNew() {
+		var boolWalls: Array<Array<Bool>> = [];
+		for (wall in walls.get()) {
+			boolWalls.push(wall.map((e) -> e.get()));
+		}
+		var grid = new GridGraph(boolWalls);
+		var aStar = new AStar();
+
+		try {
+
+			var timeStart = Browser.window.performance.now();
+			var temp = aStar.findPath(startPos.get(), endPos.get(), grid);
+			var time = Browser.window.performance.now() - timeStart;
+
+			var resultingPath: Array<Line> = [];
+			var pathLength: Float = 0;
+			for (i in 0...temp.points.length - 1) {
+				var a = temp.points[i];
+				var b = temp.points[i + 1];
+				resultingPath.push({a: a, b: b});
+				var dx = b.x - a.x;
+				var dy = b.y - a.y;
+				pathLength += Math.sqrt(dx * dx + dy * dy);
+			}
+
+			// last segment
+			var a = temp.points[temp.points.length - 2];
+			var b = temp.points[temp.points.length - 1];
+			resultingPath.push({a: a, b: b});
+			var dx = b.x - a.x;
+			var dy = b.y - a.y;
+			pathLength += Math.sqrt(dx * dx + dy * dy);
+
+			path.set(resultingPath);
+			message.set("Path length: " + pathLength + ", elapsed time: " + time);
+
+		} catch (e) {
+			message.set(e.message);
+		}
 	}
 
 	private function findPath(findPath: (Map, IntPoint, IntPoint) -> Path) {
