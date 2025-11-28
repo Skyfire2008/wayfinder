@@ -2,6 +2,7 @@ package org.skyfire2008.wayfinder.path;
 
 import polygonal.ds.PriorityQueue;
 
+import org.skyfire2008.wayfinder.path.Pathfinder.PathGraph;
 import org.skyfire2008.wayfinder.geom.IntPoint;
 import org.skyfire2008.wayfinder.geom.IntRect;
 import org.skyfire2008.wayfinder.util.IntIterator.RevIntIterator;
@@ -9,7 +10,7 @@ import org.skyfire2008.wayfinder.util.Util;
 
 using Lambda;
 
-class NavMesh {
+class NavMesh implements PathGraph<Node> {
 	private var nodes: Array<Node>;
 
 	private var nodeGrid: Array<Array<Int>>;
@@ -27,9 +28,9 @@ class NavMesh {
 		var rects = useGlobal ? NavMesh.wallsToRectsGlobal(walls) : NavMesh.wallsToRects(walls);
 
 		this.nodes = [];
-		this.nodeGrid = [for (y in 0...height) [for (x in 0...width) null]];
+		this.nodeGrid = [for (y in 0...height) [for (x in 0...width) -1]];
 		for (rect in rects) {
-			var node = new Node(rect, []);
+			var node = new Node(nodes.length, rect, []);
 			for (x in rect.x...rect.right) {
 				for (y in rect.y...rect.bottom) {
 					nodeGrid[y][x] = nodes.length;
@@ -54,7 +55,11 @@ class NavMesh {
 						var y0 = Util.max(node.rect.y, other.rect.y);
 						var y1 = Util.min(node.rect.bottom, other.rect.bottom);
 						y = y1;
-						// NavMesh.addEdgePrivate(result, region.id, other.id, new Exit(new Point(x, y0), new Point(x, y1)));
+
+						var p0 = new IntPoint(x, y0);
+						var p1 = new IntPoint(x, y1);
+						node.edges.push(new Edge(p0, p1, other.key));
+						other.edges.push(new Edge(p0, p1, node.key));
 					}
 				}
 			}
@@ -71,46 +76,28 @@ class NavMesh {
 						var x0 = Util.max(node.rect.x, other.rect.x);
 						var x1 = Util.min(node.rect.right, other.rect.right);
 						x = x1;
-						// NavMesh.addEdgePrivate(result, region.id, other.id, new Exit(new Point(x0, y), new Point(x1, y)));
-					}
-				}
-			}
 
-			// left
-			if (node.rect.x > 0) {
-				x = node.rect.x - 1;
-				y = node.rect.y;
-				while (y < node.rect.bottom) {
-					if (walls[y][x]) {
-						y++;
-					} else {
-						var other = nodes[nodeGrid[y][x]];
-						var y0 = Util.max(node.rect.y, other.rect.y);
-						var y1 = Util.min(node.rect.bottom, other.rect.bottom);
-						y = y1;
-						// NavMesh.addEdgePrivate(result, region.id, other.id, new Exit(new Point(x, y0), new Point(x, y1)));
-					}
-				}
-			}
-
-			// top
-			if (node.rect.y > 0) {
-				x = node.rect.x;
-				y = node.rect.y - 1;
-				while (x < node.rect.right) {
-					if (walls[y][x]) {
-						x++;
-					} else {
-						var other = nodes[nodeGrid[y][x]];
-						var x0 = Util.max(node.rect.x, other.rect.x);
-						var x1 = Util.min(node.rect.right, other.rect.right);
-						x = x1;
-						// NavMesh.addEdgePrivate(result, region.id, other.id, new Exit(new Point(x0, y), new Point(x1, y)));
+						var p0 = new IntPoint(x0, y);
+						var p1 = new IntPoint(x1, y);
+						node.edges.push(new Edge(p0, p1, other.key));
+						other.edges.push(new Edge(p0, p1, node.key));
 					}
 				}
 			}
 		}
+	}
 
+	public function getNode(pos: IntPoint): Node {
+		var nodeId = this.nodeGrid[pos.y][pos.x];
+		if (nodeId < 0) {
+			return null;
+		} else {
+			return nodes[nodeId];
+		}
+	}
+
+	public function getNeighbours(node: Node): Array<Node> {
+		return node.edges.map((edge) -> nodes[edge.neighbourId]);
 	}
 
 	/**

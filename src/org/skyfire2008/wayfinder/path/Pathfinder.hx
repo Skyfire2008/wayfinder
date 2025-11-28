@@ -59,7 +59,7 @@ abstract class PathNode<T:PathNode<T>> implements Prioritizable implements Hasha
 
 	public function resetPathfinding() {
 		this.prevInPath = null;
-		this.g = 0;
+		this.g = Math.POSITIVE_INFINITY;
 		this.h = 0;
 	}
 }

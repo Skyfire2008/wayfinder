@@ -175,6 +175,38 @@ class ViewModel {
 		findPath(Path.findThetaStar);
 	}
 
+	public function findAPathNavMesh() {
+		var navMeshValue = navMesh.get();
+		if (navMeshValue != null) {
+
+			var aStar = new AStar();
+			try {
+				var timeStart = Browser.window.performance.now();
+				var temp = aStar.findPath(startPos.get(), endPos.get(), navMeshValue);
+				var time = Browser.window.performance.now() - timeStart;
+
+				var resultingPath: Array<Line> = [];
+				var pathLength: Float = 0;
+				for (i in 0...temp.points.length - 1) {
+					var a = temp.points[i];
+					var b = temp.points[i + 1];
+					resultingPath.push({a: a, b: b});
+					var dx = b.x - a.x;
+					var dy = b.y - a.y;
+					pathLength += Math.sqrt(dx * dx + dy * dy);
+				}
+
+				path.set(resultingPath);
+				message.set("Path length: " + pathLength + ", elapsed time: " + time);
+			} catch (e) {
+				message.set(e.message);
+			}
+
+		} else {
+			message.set("Generate navmesh first");
+		}
+	}
+
 	public function findAPathNew() {
 		var boolWalls: Array<Array<Bool>> = [];
 		for (wall in walls.get()) {
@@ -184,7 +216,6 @@ class ViewModel {
 		var aStar = new AStar();
 
 		try {
-
 			var timeStart = Browser.window.performance.now();
 			var temp = aStar.findPath(startPos.get(), endPos.get(), grid);
 			var time = Browser.window.performance.now() - timeStart;
@@ -199,14 +230,6 @@ class ViewModel {
 				var dy = b.y - a.y;
 				pathLength += Math.sqrt(dx * dx + dy * dy);
 			}
-
-			// last segment
-			var a = temp.points[temp.points.length - 2];
-			var b = temp.points[temp.points.length - 1];
-			resultingPath.push({a: a, b: b});
-			var dx = b.x - a.x;
-			var dy = b.y - a.y;
-			pathLength += Math.sqrt(dx * dx + dy * dy);
 
 			path.set(resultingPath);
 			message.set("Path length: " + pathLength + ", elapsed time: " + time);
@@ -238,14 +261,6 @@ class ViewModel {
 				var dy = b.y - a.y;
 				pathLength += Math.sqrt(dx * dx + dy * dy);
 			}
-
-			// last segment
-			var a = temp.points[temp.points.length - 2];
-			var b = temp.points[temp.points.length - 1];
-			resultingPath.push({a: a, b: b});
-			var dx = b.x - a.x;
-			var dy = b.y - a.y;
-			pathLength += Math.sqrt(dx * dx + dy * dy);
 
 			path.set(resultingPath);
 			message.set("Path length: " + pathLength + ", elapsed time: " + time);

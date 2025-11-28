@@ -5,9 +5,11 @@ import org.skyfire2008.wayfinder.path.Pathfinder.PathGraph;
 import org.skyfire2008.wayfinder.path.Pathfinder.PathNode;
 
 class GridNode extends PathNode<GridNode> {
-	public function new(key: Int, pos: IntPoint) {
+	private static var nodeKey = 0;
+
+	public function new(pos: IntPoint) {
 		super();
-		this.key = key;
+		this.key = nodeKey++;
 		this.pos = pos;
 	}
 }
@@ -18,7 +20,6 @@ class GridGraph implements PathGraph<GridNode> {
 	public function new(walls: Array<Array<Bool>>) {
 		grid = [];
 
-		var nodeKey = 0;
 		var y = 0;
 		for (row in walls) {
 			var nodeRow: Array<GridNode> = [];
@@ -28,7 +29,7 @@ class GridGraph implements PathGraph<GridNode> {
 				if (wall) {
 					nodeRow.push(null);
 				} else {
-					nodeRow.push(new GridNode(nodeKey++, new IntPoint(x, y)));
+					nodeRow.push(new GridNode(new IntPoint(x, y)));
 				}
 				x++;
 			}
