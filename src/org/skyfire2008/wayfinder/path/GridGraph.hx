@@ -12,6 +12,10 @@ class GridNode extends PathNode<GridNode> {
 		this.key = nodeKey++;
 		this.pos = pos;
 	}
+
+	public function setNeighbours(neighbours: Array<GridNode>) {
+		this.neighbours = neighbours;
+	}
 }
 
 class GridGraph implements PathGraph<GridNode> {
@@ -21,6 +25,8 @@ class GridGraph implements PathGraph<GridNode> {
 		grid = [];
 
 		var y = 0;
+		var nodes: Array<GridNode> = [];
+		// convert 2d array of walls into 2d array of nodes
 		for (row in walls) {
 			var nodeRow: Array<GridNode> = [];
 
@@ -29,7 +35,9 @@ class GridGraph implements PathGraph<GridNode> {
 				if (wall) {
 					nodeRow.push(null);
 				} else {
-					nodeRow.push(new GridNode(new IntPoint(x, y)));
+					var node = new GridNode(new IntPoint(x, y));
+					nodeRow.push(node);
+					nodes.push(node);
 				}
 				x++;
 			}
@@ -37,41 +45,91 @@ class GridGraph implements PathGraph<GridNode> {
 			y++;
 			grid.push(nodeRow);
 		}
+
+		// calculate node neighbours
+		for (node in nodes) {
+			var neighbours: Array<GridNode> = [];
+
+			if (node.pos.x < grid[0].length - 1) {
+				var neighbour = grid[node.pos.y][node.pos.x + 1];
+				if (neighbour != null) {
+					neighbours.push(neighbour);
+				}
+			}
+			if (node.pos.x > 0) {
+				var neighbour = grid[node.pos.y][node.pos.x - 1];
+				if (neighbour != null) {
+					neighbours.push(neighbour);
+				}
+			}
+			if (node.pos.y > 0) {
+				var neighbour = grid[node.pos.y - 1][node.pos.x];
+				if (neighbour != null) {
+					neighbours.push(neighbour);
+				}
+			}
+			if (node.pos.y < grid.length - 1) {
+				var neighbour = grid[node.pos.y + 1][node.pos.x];
+				if (neighbour != null) {
+					neighbours.push(neighbour);
+				}
+			}
+
+			node.setNeighbours(neighbours);
+		}
 	}
 
 	public function getNode(pos: IntPoint): GridNode {
 		return grid[pos.y][pos.x];
 	}
 
-	public function getNeighbours(node: GridNode): Array<GridNode> {
-		var result: Array<GridNode> = [];
+	public function checkVisibility(p0: IntPoint, p1: IntPoint): Bool {
+		// this is a special case since points are integer, so no taking care of different positions inside a cell is necessary
+		var stepX = p1.x > p0.x ? 1 : -1;
+		var stepY = p1.y > p0.y ? 1 : -1;
+		var v: IntPoint = new IntPoint(p1.x - p0.x, p1.y - p0.y);
 
-		// TODO: probably need to store it in the node itself
-		if (node.pos.x < grid[0].length - 1) {
-			var neighbour = grid[node.pos.y][node.pos.x + 1];
-			if (neighbour != null) {
-				result.push(neighbour);
-			}
-		}
-		if (node.pos.x > 0) {
-			var neighbour = grid[node.pos.y][node.pos.x - 1];
-			if (neighbour != null) {
-				result.push(neighbour);
-			}
-		}
-		if (node.pos.y > 0) {
-			var neighbour = grid[node.pos.y - 1][node.pos.x];
-			if (neighbour != null) {
-				result.push(neighbour);
-			}
-		}
-		if (node.pos.y < grid.length - 1) {
-			var neighbour = grid[node.pos.y + 1][node.pos.x];
-			if (neighbour != null) {
-				result.push(neighbour);
-			}
+		var tDeltaX = stepX / v.x;
+		var tDeltaY = stepY / v.y;
+
+		// distance to next horizontal border in t
+		// always 0.5/abs(v.x) cause point is in the center of cell
+		var tMaxX: Float;
+		if (!Math.isFinite(tDeltaX)) {
+			tMaxX = Math.POSITIVE_INFINITY;
+		} else {
+			tMaxX = 0.5 * tDeltaX;
 		}
 
-		return result;
+		// distance to next vertical border in t
+		var tMaxY: Float;
+		if (!Math.isFinite(tDeltaY)) {
+			tMaxY = Math.POSITIVE_INFINITY;
+		} else {
+			tMaxY = 0.5 * tDeltaY;
+		}
+
+		var x = p0.x;
+		var y = p0.y;
+
+		while (x != p1.x || y != p1.y) {
+			if (isWall(x, y)) {
+				return false;
+			}
+
+			if (tMaxX < tMaxY) {
+				tMaxX += tDeltaX;
+				x += stepX;
+			} else {
+				tMaxY += tDeltaY;
+				y += stepY;
+			}
+		}
+
+		return true;
+	}
+
+	public inline function isWall(x: Int, y: Int): Bool {
+		return grid[y][x] == null;
 	}
 }

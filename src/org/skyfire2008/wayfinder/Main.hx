@@ -1,5 +1,7 @@
 package org.skyfire2008.wayfinder;
 
+import org.skyfire2008.wayfinder.path.ThetaStar;
+
 import js.html.MouseEvent;
 import js.Browser;
 
@@ -7,7 +9,7 @@ import org.skyfire2008.wayfinder.geom.IntPoint;
 import org.skyfire2008.wayfinder.path.NavMesh;
 import org.skyfire2008.wayfinder.path.Map;
 import org.skyfire2008.wayfinder.path.Path;
-import org.skyfire2008.wayfinder.path.Pathfinder.AStar;
+import org.skyfire2008.wayfinder.path.AStar;
 import org.skyfire2008.wayfinder.path.GridGraph;
 import org.skyfire2008.wayfinder.mapGen.Random;
 import org.skyfire2008.wayfinder.mapGen.Generator;
@@ -204,6 +206,38 @@ class ViewModel {
 
 		} else {
 			message.set("Generate navmesh first");
+		}
+	}
+
+	public function findThetaPathNew() {
+		var boolWalls: Array<Array<Bool>> = [];
+		for (wall in walls.get()) {
+			boolWalls.push(wall.map((e) -> e.get()));
+		}
+		var grid = new GridGraph(boolWalls);
+		var thetaStart = new ThetaStar();
+
+		try {
+			var timeStart = Browser.window.performance.now();
+			var temp = thetaStart.findPath(startPos.get(), endPos.get(), grid);
+			var time = Browser.window.performance.now() - timeStart;
+
+			var resultingPath: Array<Line> = [];
+			var pathLength: Float = 0;
+			for (i in 0...temp.points.length - 1) {
+				var a = temp.points[i];
+				var b = temp.points[i + 1];
+				resultingPath.push({a: a, b: b});
+				var dx = b.x - a.x;
+				var dy = b.y - a.y;
+				pathLength += Math.sqrt(dx * dx + dy * dy);
+			}
+
+			path.set(resultingPath);
+			message.set("Path length: " + pathLength + ", elapsed time: " + time);
+
+		} catch (e) {
+			message.set(e.message);
 		}
 	}
 

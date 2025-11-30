@@ -60,6 +60,9 @@ class NavMesh implements PathGraph<Node> {
 						var p1 = new IntPoint(x, y1);
 						node.edges.push(new Edge(p0, p1, other.key));
 						other.edges.push(new Edge(p0, p1, node.key));
+
+						node.neighbours.push(other);
+						other.neighbours.push(node);
 					}
 				}
 			}
@@ -81,6 +84,9 @@ class NavMesh implements PathGraph<Node> {
 						var p1 = new IntPoint(x1, y);
 						node.edges.push(new Edge(p0, p1, other.key));
 						other.edges.push(new Edge(p0, p1, node.key));
+
+						node.neighbours.push(other);
+						other.neighbours.push(node);
 					}
 				}
 			}
@@ -96,8 +102,9 @@ class NavMesh implements PathGraph<Node> {
 		}
 	}
 
-	public function getNeighbours(node: Node): Array<Node> {
-		return node.edges.map((edge) -> nodes[edge.neighbourId]);
+	public function checkVisibility(p0: IntPoint, p1: IntPoint): Bool {
+		// TODO: implement
+		return false;
 	}
 
 	/**

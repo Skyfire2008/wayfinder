@@ -6,6 +6,7 @@ import org.skyfire2008.wayfinder.path.Pathfinder.PathNode;
 
 class Node extends PathNode<Node> {
 	public var rect(default, null): IntRect;
+	// TODO: edges are redundant with neighbours
 	public var edges(default, null): Array<Edge>;
 
 	public function new(key: Int, rect: IntRect, edges: Array<Edge>) {
@@ -15,5 +16,7 @@ class Node extends PathNode<Node> {
 		this.key = key;
 		this.rect = rect;
 		this.edges = edges;
+
+		this.neighbours = [];
 	}
 }

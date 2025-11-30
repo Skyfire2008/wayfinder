@@ -10,15 +10,10 @@ class Map {
 	public var width(get, null): Int;
 	public var height(get, null): Int;
 
-	// TODO: what is this for?
-	// public var navMesh: NavMesh;
-
 	public function new(walls: Array<Array<Bool>>, tileWidth: Float, tileHeight: Float) {
 		this.walls = walls;
 		this.tileWidth = tileWidth;
 		this.tileHeight = tileHeight;
-
-		// this.navMesh = NavMesh.makeNavMesh(walls, tileWidth, tileHeight);
 	}
 
 	/**

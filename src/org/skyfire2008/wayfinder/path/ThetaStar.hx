@@ -1,0 +1,118 @@
+package org.skyfire2008.wayfinder.path;
+
+import polygonal.ds.HashSet;
+import polygonal.ds.PriorityQueue;
+
+import org.skyfire2008.wayfinder.geom.IntPoint;
+import org.skyfire2008.wayfinder.path.Pathfinder;
+import org.skyfire2008.wayfinder.path.Pathfinder.PathGraph;
+import org.skyfire2008.wayfinder.path.Pathfinder.PathNode;
+
+class ThetaStar implements Pathfinder {
+	public function new() {}
+
+	public function findPath<T: PathNode<T>>(start: IntPoint, end: IntPoint, graph: PathGraph<T>): Path {
+		// TODO: move validity checks outside of findPath
+		var startNode = graph.getNode(start);
+		if (startNode == null) {
+			return null;
+		}
+
+		var endNode = graph.getNode(end);
+		if (endNode == null) {
+			return null;
+		}
+
+		if (start.x == end.x && start.y == end.y) {
+			return null;
+		}
+
+		// initialize closed set and priority queue
+		var closed = new HashSet<T>(1024);
+		var queue = new PriorityQueue<T>(1024, true);
+
+		startNode.setG(0);
+		// set startNode's previous node to itself so that there's no need to check if node has a previous for visibility check later
+		startNode.setPrev(startNode, 0);
+		queue.enqueue(startNode);
+
+		// while queue is not empty
+		while (!queue.isEmpty()) {
+
+			// get best node and add it to closed set
+			var current = queue.dequeue();
+			closed.set(current);
+
+			// if end reached, stop
+			if (current == endNode) {
+				break;
+			}
+
+			// iterate over its neighbours
+			for (neighbour in current.neighbours) {
+
+				// skip if neighbour is already closed
+				if (closed.has(neighbour)) {
+					continue;
+				}
+
+				// set neighbour's h value
+				if (neighbour.h == 0) {
+					neighbour.setH(IntPoint.distance(end, neighbour.pos));
+				}
+
+				var prev: T = null;
+				// if neighbour visible from current's previous node...
+				if (graph.checkVisibility(current.prevInPath.pos, neighbour.pos)) {
+					// connect neigbour to previous node instead
+					prev = current.prevInPath;
+				} else {
+					// otherwise, use current, jsut like in A*
+					prev = current;
+				}
+
+				// calculate best priority for this neighbour
+				// prev node's distance from start + distance from prev to neighbour + neighbour heuristic
+				var distance = IntPoint.distance(prev.pos, neighbour.pos);
+				var bestPriority = prev.g + distance + neighbour.h;
+
+				// skip if already closed or had better previous node
+				if (neighbour.priority <= bestPriority) {
+					continue;
+				}
+
+				// otherwise, connect to previous node
+				neighbour.setPrev(prev, distance);
+				if (queue.contains(neighbour)) {
+					queue.reprioritize(neighbour, neighbour.priority);
+				} else {
+					queue.enqueue(neighbour);
+				}
+			}
+		}
+
+		// check that path is finished
+		if (!closed.has(endNode)) {
+			throw "End unreachable";
+		}
+
+		// build path
+		var points: Array<IntPoint> = [];
+		var current = endNode;
+		while (current != startNode) { // since startNode is looped onto itself
+			points.unshift(current.pos);
+			current = current.prevInPath;
+		}
+		points.unshift(start);
+
+		// reset pathfinding
+		for (node in closed) {
+			node.resetPathfinding();
+		}
+		for (node in queue) {
+			node.resetPathfinding();
+		}
+
+		return new Path(points);
+	}
+}
