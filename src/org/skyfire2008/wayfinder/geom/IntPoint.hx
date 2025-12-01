@@ -14,4 +14,13 @@ class IntPoint {
 		this.x = x;
 		this.y = y;
 	}
+
+	public function copy() {
+		return new IntPoint(x, y);
+	}
+
+	public inline function add(other: IntPoint) {
+		x += other.x;
+		y += other.y;
+	}
 }

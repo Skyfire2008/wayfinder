@@ -1,5 +1,6 @@
 package org.skyfire2008.wayfinder;
 
+import org.skyfire2008.wayfinder.path.FlowField;
 import org.skyfire2008.wayfinder.path.ThetaStar;
 
 import js.html.MouseEvent;
@@ -50,6 +51,7 @@ class ViewModel {
 
 	public var navMesh: Observable<NavMesh>;
 	public var path: Observable<Array<Line>>;
+	public var flowField: Observable<FlowField>;
 	public var message: Observable<String>;
 
 	public var generators: Array<GenInfo> = [
@@ -79,6 +81,7 @@ class ViewModel {
 
 		this.navMesh = Knockout.observable(null);
 		this.path = Knockout.observable([]);
+		this.flowField = Knockout.observable(null);
 		this.message = Knockout.observable(null);
 
 		this.generator = Knockout.observable(generators[0]);
@@ -154,9 +157,59 @@ class ViewModel {
 		// reset state
 		this.message.set(null);
 		this.navMesh.set(null);
+		this.flowField.set(null);
 		this.path.set(null);
 		this.startPos.set(null);
 		this.endPos.set(null);
+	}
+
+	public function genFlowField() {
+		var boolWalls: Array<Array<Bool>> = [];
+		for (wall in walls.get()) {
+			boolWalls.push(wall.map((e) -> e.get()));
+		}
+
+		if (endPos.get() == null) {
+			message.set("Set end position first!");
+		} else {
+			var timeStart = Browser.window.performance.now();
+			var temp = new FlowField(boolWalls, endPos.get());
+			var time = Browser.window.performance.now() - timeStart;
+			flowField.set(temp);
+			message.set("Flow field generated in: " + time);
+		}
+	}
+
+	public function findFlowFieldPath() {
+
+		if (flowField.get() == null) {
+			message.set("Generate a flow field first");
+		}
+
+		try {
+			var field = flowField.get();
+			var start = this.startPos.get();
+			var timeStart = Browser.window.performance.now();
+			var temp = field.getPath(start);
+			var time = Browser.window.performance.now() - timeStart;
+
+			var resultingPath: Array<Line> = [];
+			var pathLength: Float = 0;
+			for (i in 0...temp.points.length - 1) {
+				var a = temp.points[i];
+				var b = temp.points[i + 1];
+				resultingPath.push({a: a, b: b});
+				var dx = b.x - a.x;
+				var dy = b.y - a.y;
+				pathLength += Math.sqrt(dx * dx + dy * dy);
+			}
+
+			path.set(resultingPath);
+			message.set("Path length: " + pathLength + ", elapsed time: " + time);
+
+		} catch (e) {
+			message.set(e.message);
+		}
 	}
 
 	public function setStart() {

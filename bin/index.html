@@ -35,17 +35,6 @@
 					height: height()*tileHeight
        			}
 				">
-				<defs>
-					<g id="flag" stroke-width="2">
-						<line x1="0" y1="20" x2="20" y2="20" />
-						<line x1="10" y1="0" x2="10" y2="20" />
-						<line x1="10" y1="0" x2="20" y2="5" />
-						<line x1="20" y1="5" x2="10" y2="10" />
-					</g>
-					<g id="path" stroke-width="2" stroke="#ff0000">
-						<circle cx="10" cy="10" r="5" fill="#ff0000">
-					</g>
-				</defs>
 
 				<!-- ko foreach: walls -->
 				<!-- ko foreach: $data -->
@@ -68,7 +57,7 @@
 				<!-- /ko -->
 
 				<!-- ko foreach: path() -->
-				<line stroke="#ff0000" stroke-linecap="round" stroke-width="5" class="noMouseEvents" data-bind="
+				<line stroke="#ffff00" stroke-linecap="round" stroke-width="5" class="noMouseEvents" data-bind="
 					attr: {
 						x1: ($data.a.x+0.5) * $root.tileWidth,
 						y1: ($data.a.y+0.5) * $root.tileHeight,
@@ -79,21 +68,27 @@
 				<!-- /ko -->
 
 				<!-- ko if: startPos() -->
-				<use class="noMouseEvents" href="#flag" stroke="#00e000" data-bind="
+				<rect data-bind="
 					attr: {
 						x: startPos().x*tileWidth,
-						y: startPos().y*tileHeight
+						y: startPos().y*tileHeight,
+						width: $root.tileWidth,
+						height: $root.tileHeight,
+						fill: '#00ff00'
 					}
-				"></use>
+				"></rect>
 				<!-- /ko -->
 
 				<!-- ko if: endPos() -->
-				<use class="noMouseEvents" href="#flag" stroke="red" data-bind="
+				<rect data-bind="
 					attr: {
 						x: endPos().x*tileWidth,
-						y: endPos().y*tileHeight
+						y: endPos().y*tileHeight,
+						width: $root.tileWidth,
+						height: $root.tileHeight,
+						fill: '#ff0000'
 					}
-				"></use>
+				"></rect>
 				<!-- /ko -->
 
 				<!-- ko if: navMesh() -->
@@ -125,6 +120,8 @@
 			<button data-bind="click: findAPathNew">Find A* path (NEW!)</button>
 			<button data-bind="click: findThetaPathNew">Find θ* path (NEW!)</button>
 			<button data-bind="click: findAPathNavMesh">Find A* path with navmesh</button>
+			<button data-bind="click: genFlowField">Generate flow field</button>
+			<button data-bind="click: findFlowFieldPath">Find path using flow field</button>
 		</div>
 
 	</div>

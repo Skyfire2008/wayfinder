@@ -54,6 +54,7 @@ class Candidate implements Prioritizable {
 	}
 }
 
+// TODO: retire this class
 class Path {
 	public var points: Array<IntPoint>;
 
