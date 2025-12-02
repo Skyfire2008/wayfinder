@@ -1,6 +1,7 @@
 package org.skyfire2008.wayfinder.path;
 
-import polygonal.ds.HashSet;
+import js.lib.Set;
+
 import polygonal.ds.PriorityQueue;
 
 import org.skyfire2008.wayfinder.geom.IntPoint;
@@ -11,25 +12,24 @@ import org.skyfire2008.wayfinder.path.Pathfinder.PathNode;
 class AStar implements Pathfinder {
 	public function new() {}
 
-	public function findPath<T: PathNode<T>>(start: IntPoint, end: IntPoint, graph: PathGraph<T>): Path {
-		// TODO: add exceptions
+	public function findPath<T: PathNode<T>>(start: IntPoint, end: IntPoint, graph: PathGraph<T>): Array<IntPoint> {
 		var startNode = graph.getNode(start);
 		if (startNode == null) {
-			return null;
+			throw "Start node is undefined or a wall";
 		}
 
 		var endNode = graph.getNode(end);
 		if (endNode == null) {
-			return null;
+			throw "End node is undefined or a wall";
 		}
 
 		if (start.x == end.x && start.y == end.y) {
-			return null;
+			throw "Start position is the same as end position";
 		}
 
 		// initialize closed set and priority queue
-		var closed = new HashSet<T>(1024);
-		var queue = new PriorityQueue<T>(1024, true);
+		var closed = new Set<T>();
+		var queue = new PriorityQueue<T>(65536, true);
 
 		startNode.setG(0);
 		queue.enqueue(startNode);
@@ -39,7 +39,7 @@ class AStar implements Pathfinder {
 
 			// get best node and add it to closed set
 			var current = queue.dequeue();
-			closed.set(current);
+			closed.add(current);
 
 			// if end reached, stop
 			if (current == endNode) {
@@ -101,6 +101,6 @@ class AStar implements Pathfinder {
 			node.resetPathfinding();
 		}
 
-		return new Path(points);
+		return points;
 	}
 }

@@ -5,11 +5,8 @@ import org.skyfire2008.wayfinder.path.Pathfinder.PathGraph;
 import org.skyfire2008.wayfinder.path.Pathfinder.PathNode;
 
 class GridNode extends PathNode<GridNode> {
-	private static var nodeKey = 0;
-
 	public function new(pos: IntPoint) {
 		super();
-		this.key = nodeKey++;
 		this.pos = pos;
 	}
 

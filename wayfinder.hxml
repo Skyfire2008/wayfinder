@@ -3,9 +3,3 @@
 -main org.skyfire2008.wayfinder.Main
 -lib knockout.hx
 -lib polygonal-ds
-
---next
--neko bin/test.n
--cp src
--lib polygonal-ds
--main org.skyfire2008.wayfinder.test.Main

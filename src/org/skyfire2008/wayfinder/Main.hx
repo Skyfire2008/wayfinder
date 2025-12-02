@@ -1,5 +1,6 @@
 package org.skyfire2008.wayfinder;
 
+import org.skyfire2008.wayfinder.path.Pathfinder;
 import org.skyfire2008.wayfinder.path.FlowField;
 import org.skyfire2008.wayfinder.path.ThetaStar;
 
@@ -9,7 +10,6 @@ import js.Browser;
 import org.skyfire2008.wayfinder.geom.IntPoint;
 import org.skyfire2008.wayfinder.path.NavMesh;
 import org.skyfire2008.wayfinder.path.Map;
-import org.skyfire2008.wayfinder.path.Path;
 import org.skyfire2008.wayfinder.path.AStar;
 import org.skyfire2008.wayfinder.path.GridGraph;
 import org.skyfire2008.wayfinder.mapGen.Random;
@@ -55,8 +55,8 @@ class ViewModel {
 	public var message: Observable<String>;
 
 	public var generators: Array<GenInfo> = [
-		{name: "Random", gen: new Random(0.4)},
-		{name: "Cave", gen: new Cave(0.5, 3, 4, 5)},
+		{name: "Random", gen: new Random(0.25)},
+		{name: "Cave", gen: new Cave(0.5, 3, 4, 6)},
 		{name: "Maze", gen: new Maze()}
 	];
 	public var generator: Observable<GenInfo>;
@@ -195,9 +195,9 @@ class ViewModel {
 
 			var resultingPath: Array<Line> = [];
 			var pathLength: Float = 0;
-			for (i in 0...temp.points.length - 1) {
-				var a = temp.points[i];
-				var b = temp.points[i + 1];
+			for (i in 0...temp.length - 1) {
+				var a = temp[i];
+				var b = temp[i + 1];
 				resultingPath.push({a: a, b: b});
 				var dx = b.x - a.x;
 				var dy = b.y - a.y;
@@ -222,14 +222,6 @@ class ViewModel {
 		settingEnd.set(true);
 	}
 
-	public function findAPath() {
-		findPath(Path.findAStar);
-	}
-
-	public function findThetaPath() {
-		findPath(Path.findThetaStar);
-	}
-
 	public function findAPathNavMesh() {
 		var navMeshValue = navMesh.get();
 		if (navMeshValue != null) {
@@ -237,22 +229,11 @@ class ViewModel {
 			var aStar = new AStar();
 			try {
 				var timeStart = Browser.window.performance.now();
-				var temp = aStar.findPath(startPos.get(), endPos.get(), navMeshValue);
+				var points = aStar.findPath(startPos.get(), endPos.get(), navMeshValue);
 				var time = Browser.window.performance.now() - timeStart;
 
-				var resultingPath: Array<Line> = [];
-				var pathLength: Float = 0;
-				for (i in 0...temp.points.length - 1) {
-					var a = temp.points[i];
-					var b = temp.points[i + 1];
-					resultingPath.push({a: a, b: b});
-					var dx = b.x - a.x;
-					var dy = b.y - a.y;
-					pathLength += Math.sqrt(dx * dx + dy * dy);
-				}
+				calcAndSetPathLines(points, time);
 
-				path.set(resultingPath);
-				message.set("Path length: " + pathLength + ", elapsed time: " + time);
 			} catch (e) {
 				message.set(e.message);
 			}
@@ -262,96 +243,43 @@ class ViewModel {
 		}
 	}
 
-	public function findThetaPathNew() {
+	public function findThetaPath() {
+		findPathGrid(new ThetaStar());
+	}
+
+	public function findAPath() {
+		findPathGrid(new AStar());
+	}
+
+	private function calcAndSetPathLines(points: Array<IntPoint>, time: Float) {
+		var resultingPath: Array<Line> = [];
+		var pathLength: Float = 0;
+		for (i in 0...points.length - 1) {
+			var a = points[i];
+			var b = points[i + 1];
+			resultingPath.push({a: a, b: b});
+			var dx = b.x - a.x;
+			var dy = b.y - a.y;
+			pathLength += Math.sqrt(dx * dx + dy * dy);
+		}
+
+		path.set(resultingPath);
+		message.set("Path length: " + pathLength + ", elapsed time: " + time);
+	}
+
+	private function findPathGrid(pathfinder: Pathfinder) {
+		// convert wall array to grid graph
 		var boolWalls: Array<Array<Bool>> = [];
 		for (wall in walls.get()) {
 			boolWalls.push(wall.map((e) -> e.get()));
 		}
 		var grid = new GridGraph(boolWalls);
-		var thetaStart = new ThetaStar();
 
 		try {
 			var timeStart = Browser.window.performance.now();
-			var temp = thetaStart.findPath(startPos.get(), endPos.get(), grid);
+			var points = pathfinder.findPath(startPos.get(), endPos.get(), grid);
 			var time = Browser.window.performance.now() - timeStart;
-
-			var resultingPath: Array<Line> = [];
-			var pathLength: Float = 0;
-			for (i in 0...temp.points.length - 1) {
-				var a = temp.points[i];
-				var b = temp.points[i + 1];
-				resultingPath.push({a: a, b: b});
-				var dx = b.x - a.x;
-				var dy = b.y - a.y;
-				pathLength += Math.sqrt(dx * dx + dy * dy);
-			}
-
-			path.set(resultingPath);
-			message.set("Path length: " + pathLength + ", elapsed time: " + time);
-
-		} catch (e) {
-			message.set(e.message);
-		}
-	}
-
-	public function findAPathNew() {
-		var boolWalls: Array<Array<Bool>> = [];
-		for (wall in walls.get()) {
-			boolWalls.push(wall.map((e) -> e.get()));
-		}
-		var grid = new GridGraph(boolWalls);
-		var aStar = new AStar();
-
-		try {
-			var timeStart = Browser.window.performance.now();
-			var temp = aStar.findPath(startPos.get(), endPos.get(), grid);
-			var time = Browser.window.performance.now() - timeStart;
-
-			var resultingPath: Array<Line> = [];
-			var pathLength: Float = 0;
-			for (i in 0...temp.points.length - 1) {
-				var a = temp.points[i];
-				var b = temp.points[i + 1];
-				resultingPath.push({a: a, b: b});
-				var dx = b.x - a.x;
-				var dy = b.y - a.y;
-				pathLength += Math.sqrt(dx * dx + dy * dy);
-			}
-
-			path.set(resultingPath);
-			message.set("Path length: " + pathLength + ", elapsed time: " + time);
-
-		} catch (e) {
-			message.set(e.message);
-		}
-	}
-
-	private function findPath(findPath: (Map, IntPoint, IntPoint) -> Path) {
-		var boolWalls: Array<Array<Bool>> = [];
-		for (wall in walls.get()) {
-			boolWalls.push(wall.map((e) -> e.get()));
-		}
-
-		var map = new Map(boolWalls, tileWidth, tileHeight);
-		try {
-			var timeStart = Browser.window.performance.now();
-			var temp = findPath(map, startPos.get(), endPos.get());
-			var time = Browser.window.performance.now() - timeStart;
-
-			var resultingPath: Array<Line> = [];
-			var pathLength: Float = 0;
-			for (i in 0...temp.points.length - 1) {
-				var a = temp.points[i];
-				var b = temp.points[i + 1];
-				resultingPath.push({a: a, b: b});
-				var dx = b.x - a.x;
-				var dy = b.y - a.y;
-				pathLength += Math.sqrt(dx * dx + dy * dy);
-			}
-
-			path.set(resultingPath);
-			message.set("Path length: " + pathLength + ", elapsed time: " + time);
-
+			calcAndSetPathLines(points, time);
 		} catch (e) {
 			message.set(e.message);
 		}

@@ -63,7 +63,7 @@ class FlowField {
 			trace(text); */
 	}
 
-	public function getPath(start: IntPoint): Path {
+	public function getPath(start: IntPoint): Array<IntPoint> {
 		var path: Array<IntPoint> = [];
 
 		if (directions[start.y][start.x] == null) {
@@ -78,6 +78,6 @@ class FlowField {
 		}
 		path.push(end);
 
-		return new Path(path);
+		return path;
 	}
 }

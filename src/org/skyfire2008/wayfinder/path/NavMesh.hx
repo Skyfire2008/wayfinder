@@ -58,8 +58,8 @@ class NavMesh implements PathGraph<Node> {
 
 						var p0 = new IntPoint(x, y0);
 						var p1 = new IntPoint(x, y1);
-						node.edges.push(new Edge(p0, p1, other.key));
-						other.edges.push(new Edge(p0, p1, node.key));
+						node.edges.push(new Edge(p0, p1, other.id));
+						other.edges.push(new Edge(p0, p1, node.id));
 
 						node.neighbours.push(other);
 						other.neighbours.push(node);
@@ -82,8 +82,8 @@ class NavMesh implements PathGraph<Node> {
 
 						var p0 = new IntPoint(x0, y);
 						var p1 = new IntPoint(x1, y);
-						node.edges.push(new Edge(p0, p1, other.key));
-						other.edges.push(new Edge(p0, p1, node.key));
+						node.edges.push(new Edge(p0, p1, other.id));
+						other.edges.push(new Edge(p0, p1, node.id));
 
 						node.neighbours.push(other);
 						other.neighbours.push(node);

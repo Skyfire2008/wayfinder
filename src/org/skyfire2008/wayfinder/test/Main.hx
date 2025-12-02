@@ -3,9 +3,10 @@ package org.skyfire2008.wayfinder.test;
 import org.skyfire2008.wayfinder.geom.IntPoint;
 import org.skyfire2008.wayfinder.geom.IntRect;
 import org.skyfire2008.wayfinder.path.NavMesh;
-import org.skyfire2008.wayfinder.path.Path;
+import org.skyfire2008.wayfinder.path.AStar;
 import org.skyfire2008.wayfinder.path.Map;
 
+// TODO: replace
 class Main {
 	public static function main(): Void {
 		var width = 8;
@@ -40,10 +41,10 @@ class Main {
 
 		// trace(NavMesh.makeNavMesh(tiles, 10, 10));
 
-		var path1 = Path.findAStar(map, new IntPoint(0, 6), new IntPoint(7, 0));
-		var path2 = Path.findAStar(map, new IntPoint(1, 2), new IntPoint(5, 2));
+		/* var path1 = Path.findAStar(map, new IntPoint(0, 6), new IntPoint(7, 0));
+			 var path2 = Path.findAStar(map, new IntPoint(1, 2), new IntPoint(5, 2));
 
-		trace(path1);
-		trace(path2);
+			trace(path1);
+			trace(path2); */
 	}
 }

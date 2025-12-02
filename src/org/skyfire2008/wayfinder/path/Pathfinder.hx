@@ -1,20 +1,13 @@
 package org.skyfire2008.wayfinder.path;
 
-import polygonal.ds.HashSet;
-import polygonal.ds.Hashable;
 import polygonal.ds.Prioritizable;
-import polygonal.ds.PriorityQueue;
 
 import org.skyfire2008.wayfinder.geom.IntPoint;
-import org.skyfire2008.wayfinder.path.Path;
 
-abstract class PathNode<T:PathNode<T>> implements Prioritizable implements Hashable {
+abstract class PathNode<T:PathNode<T>> implements Prioritizable {
 	// prioritizable properties
 	public var priority(default, null): Float;
 	public var position(default, null): Int;
-
-	// hashable properties
-	public var key(default, null): Int;
 
 	/**
 	 * Previous node in path
@@ -88,6 +81,16 @@ interface PathGraph<T:PathNode<T>> {
 
 }
 
+// TODO: rethink the type parameters for Pathfinder
 interface Pathfinder {
-	public function findPath<T: PathNode<T>>(start: IntPoint, end: IntPoint, pathGraph: PathGraph<T>): Path;
+
+	/**
+	 * Finds the shortest path. Assume that start and end are valid and not the same
+	 * @param start 		starting position
+	 * @param end 			end position
+	 * @param pathGraph 	graph to pathfind in
+	 * @return 				array of points
+	 */
+	public function findPath<T: PathNode<T>>(start: IntPoint, end: IntPoint, pathGraph: PathGraph<T>): Array<IntPoint>;
+
 }
