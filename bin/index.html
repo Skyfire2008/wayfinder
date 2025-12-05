@@ -25,7 +25,7 @@
 				<button data-bind="click: generateMap">Generate!</button>
 			</div>
 
-			<svg style="border: 1px solid black" data-bind="
+			<svg id="mainSvg" style="border: 1px solid black" data-bind="
         		event: {
             		mouseup: stopDrawing,
 					mouseleave: stopDrawing
@@ -39,7 +39,7 @@
 				<!-- ko foreach: walls -->
 				<!-- ko foreach: $data -->
 				<!-- ko let: {x: $index(), y: $parentContext.$index() } -->
-				<rect data-bind="
+				<rect stroke="#aaaaaa" data-bind="
 					attr: {
 						x: x*$root.tileWidth,
 						y: y*$root.tileHeight,
@@ -120,6 +120,8 @@
 			<button data-bind="click: findThetaPath">Find θ* path</button>
 			<button data-bind="click: findAPathNavMesh">Find A* path with navmesh</button>
 			<button data-bind="click: findFlowFieldPath">Find path using flow field</button>
+			<hr style="width: -webkit-fill-available;">
+			<button data-bind="click: exportSvg">Export SVG</button>
 		</div>
 
 	</div>

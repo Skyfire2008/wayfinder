@@ -1,12 +1,18 @@
 package org.skyfire2008.wayfinder;
 
+import js.Lib;
+import js.html.Blob;
+import js.html.MouseEvent;
+import js.html.svg.SVGElement;
+import js.Browser;
+import js.html.URL;
+
+import knockout.Knockout;
+import knockout.Observable;
+
 import org.skyfire2008.wayfinder.path.Pathfinder;
 import org.skyfire2008.wayfinder.path.FlowField;
 import org.skyfire2008.wayfinder.path.ThetaStar;
-
-import js.html.MouseEvent;
-import js.Browser;
-
 import org.skyfire2008.wayfinder.geom.IntPoint;
 import org.skyfire2008.wayfinder.path.NavMesh;
 import org.skyfire2008.wayfinder.path.Map;
@@ -17,9 +23,6 @@ import org.skyfire2008.wayfinder.mapGen.Generator;
 import org.skyfire2008.wayfinder.mapGen.Cave;
 import org.skyfire2008.wayfinder.mapGen.Maze;
 import org.skyfire2008.wayfinder.util.Util;
-
-import knockout.Knockout;
-import knockout.Observable;
 
 using Lambda;
 
@@ -94,6 +97,12 @@ class ViewModel {
 	}
 
 	public function onTileMouseDown(x: Int, y: Int, e: MouseEvent) {
+
+		// skip non-main(left) button presses
+		if (e.button != 0) {
+			return;
+		}
+
 		var isWall = walls.get()[y][x];
 
 		if (settingStart.get()) {
@@ -249,6 +258,35 @@ class ViewModel {
 
 	public function findAPath() {
 		findPathGrid(new AStar());
+	}
+
+	public function exportSvg() {
+		var svg: SVGElement = cast Browser.document.getElementById("mainSvg").cloneNode(true);
+		svg.removeAttribute("data-bind");
+		svg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+		svg.setAttribute("version", "1.1");
+
+		var i = 0;
+		while (i < svg.childNodes.length) {
+			var child = svg.childNodes[i];
+			i++;
+
+			if (child.nodeType == js.html.Node.COMMENT_NODE || child.nodeType == js.html.Node.TEXT_NODE) {
+				svg.removeChild(child);
+				i--;
+			} else if (child.nodeType == js.html.Node.ELEMENT_NODE) {
+				var elem: SVGElement = cast child;
+				if (elem.hasAttribute("data-bind")) {
+					elem.removeAttribute("data-bind");
+				}
+			}
+		}
+
+		var a = Browser.document.createAnchorElement();
+		a.download = "diagram.svg";
+		a.href = URL.createObjectURL(new Blob([svg.outerHTML]));
+		a.addEventListener("click", () -> Browser.window.setTimeout(() -> URL.revokeObjectURL(a.href), 1000));
+		a.click();
 	}
 
 	private function calcAndSetPathLines(points: Array<IntPoint>, time: Float) {
