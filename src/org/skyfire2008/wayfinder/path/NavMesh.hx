@@ -123,9 +123,10 @@ class NavMesh implements PathGraph<Node> {
 
 	public function checkVisibility(p0: IntPoint, p1: IntPoint): Bool {
 
-		// INFO: debug
+		#if debug
 		var nodeSet = new Set<Node>();
 		var points: Array<Point> = [];
+		#end
 
 		var stepX = p1.x >= p0.x ? 1 : -1;
 		var stepY = p1.y >= p0.y ? 1 : -1;
@@ -139,15 +140,16 @@ class NavMesh implements PathGraph<Node> {
 
 		while (node != endNode) {
 
-			// INFO: debug
+			#if debug
 			if (nodeSet.has(node)) {
 				trace(nodeSet);
 				trace(points);
-				throw "FUCK FUCK FUCK!";
+				throw "A node has been visited more than once!";
 			} else {
 				nodeSet.add(node);
 				points.push(new Point(x, y));
 			}
+			#end
 
 			// get distance to rectangle's border in movement direction
 			var xDist = stepX > 0 ? node.rect.right - x : node.rect.x - x;
@@ -170,12 +172,7 @@ class NavMesh implements PathGraph<Node> {
 					indY += stepY;
 				}
 
-				var nodeId = this.nodeGrid[indY][indX];
-				if (nodeId < 0) {
-					return false;
-				} else {
-					node = nodes[nodeId];
-				}
+				node = getNodeRaw(indX, indY);
 
 			} else {
 				x += v.x * tY;
@@ -189,12 +186,12 @@ class NavMesh implements PathGraph<Node> {
 					indX += stepX;
 				}
 
-				var nodeId = this.nodeGrid[indY][indX];
-				if (nodeId < 0) {
-					return false;
-				} else {
-					node = nodes[nodeId];
-				}
+				node = getNodeRaw(indX, indY);
+			}
+
+			// if node is null, this is a wall
+			if (node == null) {
+				return false;
 			}
 		}
 

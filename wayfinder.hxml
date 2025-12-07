@@ -3,3 +3,6 @@
 -main org.skyfire2008.wayfinder.Main
 -lib knockout.hx
 -lib polygonal-ds
+
+# set this to debug NavMesh.checkVisibility(...)
+#--debug
