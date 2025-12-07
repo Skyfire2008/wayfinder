@@ -1,8 +1,11 @@
 package org.skyfire2008.wayfinder.path;
 
+import js.lib.Set;
+
 import polygonal.ds.PriorityQueue;
 
 import org.skyfire2008.wayfinder.path.Pathfinder.PathGraph;
+import org.skyfire2008.wayfinder.geom.Point;
 import org.skyfire2008.wayfinder.geom.IntPoint;
 import org.skyfire2008.wayfinder.geom.IntRect;
 import org.skyfire2008.wayfinder.util.IntIterator.RevIntIterator;
@@ -94,17 +97,108 @@ class NavMesh implements PathGraph<Node> {
 	}
 
 	public function getNode(pos: IntPoint): Node {
-		var nodeId = this.nodeGrid[pos.y][pos.x];
-		if (nodeId < 0) {
-			return null;
-		} else {
-			return nodes[nodeId];
+		/*var nodeId = this.nodeGrid[pos.y][pos.x];
+			if (nodeId < 0) {
+				return null;
+			} else {
+				return nodes[nodeId];
+		}*/
+
+		return getNodeRaw(pos.x, pos.y);
+	}
+
+	private inline function getNodeRaw(x: Int, y: Int): Node {
+		var result: Node = null;
+
+		if (x >= 0 && x < this.nodeGrid[0].length && y >= 0 && y < this.nodeGrid.length) {
+			var nodeId = nodeGrid[y][x];
+
+			if (nodeId >= 0) {
+				result = nodes[nodeId];
+			}
 		}
+
+		return result;
 	}
 
 	public function checkVisibility(p0: IntPoint, p1: IntPoint): Bool {
-		// TODO: implement
-		return false;
+
+		// INFO: debug
+		var nodeSet = new Set<Node>();
+		var points: Array<Point> = [];
+
+		var stepX = p1.x >= p0.x ? 1 : -1;
+		var stepY = p1.y >= p0.y ? 1 : -1;
+		var v: IntPoint = new IntPoint(p1.x - p0.x, p1.y - p0.y);
+
+		var x = p0.x + 0.5;
+		var y = p0.y + 0.5;
+		var node = getNode(p0);
+
+		var endNode = getNode(p1);
+
+		while (node != endNode) {
+
+			// INFO: debug
+			if (nodeSet.has(node)) {
+				trace(nodeSet);
+				trace(points);
+				throw "FUCK FUCK FUCK!";
+			} else {
+				nodeSet.add(node);
+				points.push(new Point(x, y));
+			}
+
+			// get distance to rectangle's border in movement direction
+			var xDist = stepX > 0 ? node.rect.right - x : node.rect.x - x;
+			var yDist = stepY > 0 ? node.rect.bottom - y : node.rect.y - y;
+
+			// calculate "time" that it would take to move this distance
+			var tX = xDist / v.x;
+			var tY = yDist / v.y;
+
+			// choose movement with lowest time
+			if (tX < tY) {
+				x += xDist;
+				y += v.y * tX;
+
+				var indX = Std.int(x) + (stepX > 0 ? 0 : -1);
+				var indY = Math.floor(y);
+
+				// dirty hack
+				if (y == indY) {
+					indY += stepY;
+				}
+
+				var nodeId = this.nodeGrid[indY][indX];
+				if (nodeId < 0) {
+					return false;
+				} else {
+					node = nodes[nodeId];
+				}
+
+			} else {
+				x += v.x * tY;
+				y += yDist;
+
+				var indX = Math.floor(x);
+				var indY = Std.int(y) + (stepY > 0 ? 0 : -1);
+
+				// dirty hack
+				if (x == indX) {
+					indX += stepX;
+				}
+
+				var nodeId = this.nodeGrid[indY][indX];
+				if (nodeId < 0) {
+					return false;
+				} else {
+					node = nodes[nodeId];
+				}
+			}
+		}
+
+		return true;
 	}
 
 	/**

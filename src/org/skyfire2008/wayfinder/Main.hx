@@ -252,6 +252,27 @@ class ViewModel {
 		}
 	}
 
+	public function findThetaPathNavMesh() {
+		var navMeshValue = navMesh.get();
+		if (navMeshValue != null) {
+
+			var thetaStar = new ThetaStar();
+			try {
+				var timeStart = Browser.window.performance.now();
+				var points = thetaStar.findPath(startPos.get(), endPos.get(), navMeshValue);
+				var time = Browser.window.performance.now() - timeStart;
+
+				calcAndSetPathLines(points, time);
+
+			} catch (e) {
+				message.set(e.message);
+			}
+
+		} else {
+			message.set("Generate navmesh first");
+		}
+	}
+
 	public function findThetaPath() {
 		findPathGrid(new ThetaStar());
 	}
