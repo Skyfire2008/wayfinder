@@ -41,6 +41,7 @@ class ViewModel {
 	public var tempHeight: Observable<Int>;
 	public var height: Observable<Int>;
 	public var width: Observable<Int>;
+	public var ensureConnectivity: Observable<Bool>;
 
 	public var tileWidth: Float;
 	public var tileHeight: Float;
@@ -75,6 +76,7 @@ class ViewModel {
 		this.height = Knockout.observable(height);
 		this.tileWidth = tileWidth;
 		this.tileHeight = tileHeight;
+		this.ensureConnectivity = Knockout.observable(false);
 
 		this.removing = Knockout.observable(false);
 		this.settingStart = Knockout.observable(false);
@@ -153,6 +155,10 @@ class ViewModel {
 		var height = this.tempHeight.get();
 
 		this.map = generator.get().gen.makeMap(width, height);
+		if (ensureConnectivity.get()) {
+			map.ensureConnectivity();
+		}
+
 		var newWalls = [
 			for (y in 0...height) [
 				for (x in 0...width)
