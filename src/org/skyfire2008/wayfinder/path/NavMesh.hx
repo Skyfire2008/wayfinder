@@ -5,7 +5,6 @@ import js.lib.Set;
 import polygonal.ds.PriorityQueue;
 
 import org.skyfire2008.wayfinder.path.Pathfinder.PathGraph;
-import org.skyfire2008.wayfinder.geom.Point;
 import org.skyfire2008.wayfinder.geom.IntPoint;
 import org.skyfire2008.wayfinder.geom.IntRect;
 import org.skyfire2008.wayfinder.util.IntIterator.RevIntIterator;
@@ -13,25 +12,58 @@ import org.skyfire2008.wayfinder.util.Util;
 
 using Lambda;
 
+typedef NodeDef = {
+	var x: Int;
+	var y: Int;
+	var width: Int;
+	var height: Int;
+	var neighbours: Array<Int>;
+};
+
+typedef NavMeshDef = {
+	var nodes: Array<NodeDef>;
+};
+
 class NavMesh implements PathGraph<Node> {
 	private var nodes: Array<Node>;
 
 	private var nodeGrid: Array<Array<Int>>;
 
+	public function new(nodes: Array<Node>, nodeGrid: Array<Array<Int>>) {
+		this.nodes = nodes;
+		this.nodeGrid = nodeGrid;
+	}
+
+	public static function exportDef(navmesh: NavMesh): NavMeshDef {
+		var nodes: Array<NodeDef> = navmesh.nodes.map((node) -> {
+			return {
+				x: node.rect.x,
+				y: node.rect.y,
+				width: node.rect.width,
+				height: node.rect.height,
+				neighbours: node.neighbours.map((neighbor) -> neighbor.id)
+			}
+		});
+
+		return {
+			nodes: nodes
+		};
+	}
+
 	/**
-	 * Creates a new nav mesh from wall array
+	 * Creates a new navmesh from a wall array
 	 * @param walls 		wall array
 	 * @param useGlobal 	if enabled, will use a different algorithm for rectangle decomposition
 	 */
-	public function new(walls: Array<Array<Bool>>, useGlobal: Bool = false) {
+	public static function makeNavMesh(walls: Array<Array<Bool>>, useGlobal: Bool = false) {
 		var width = walls[0].length;
 		var height = walls.length;
 
 		// perform the rectangle decomposition and get nodes
 		var rects = useGlobal ? NavMesh.wallsToRectsGlobal(walls) : NavMesh.wallsToRects(walls);
 
-		this.nodes = [];
-		this.nodeGrid = [for (y in 0...height) [for (x in 0...width) -1]];
+		var nodes = [];
+		var nodeGrid = [for (y in 0...height) [for (x in 0...width) -1]];
 		for (rect in rects) {
 			var node = new Node(nodes.length, rect, []);
 			for (x in rect.x...rect.right) {
@@ -94,16 +126,11 @@ class NavMesh implements PathGraph<Node> {
 				}
 			}
 		}
+
+		return new NavMesh(nodes, nodeGrid);
 	}
 
 	public function getNode(pos: IntPoint): Node {
-		/*var nodeId = this.nodeGrid[pos.y][pos.x];
-			if (nodeId < 0) {
-				return null;
-			} else {
-				return nodes[nodeId];
-		}*/
-
 		return getNodeRaw(pos.x, pos.y);
 	}
 

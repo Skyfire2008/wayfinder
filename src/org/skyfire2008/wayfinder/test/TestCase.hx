@@ -1,13 +1,17 @@
 package org.skyfire2008.wayfinder.test;
 
-typedef PointDef = {
-	var x: Int;
-	var y: Int;
-};
+import org.skyfire2008.wayfinder.path.NavMesh;
+import org.skyfire2008.wayfinder.path.NavMesh.NavMeshDef;
+import org.skyfire2008.wayfinder.path.Map;
+import org.skyfire2008.wayfinder.path.Map.MapDef;
+import org.skyfire2008.wayfinder.geom.IntPoint.IntPointDef;
 
 typedef TestCaseDef = {
-	var walls: String;
-	var width: Int;
-	var height: Int;
-	var points: Array<PointDef>;
+	var map: MapDef;
+	var navMesh: NavMeshDef;
+	var points: Array<IntPointDef>;
+}
+
+class TestCase {
+	public function new() {}
 }

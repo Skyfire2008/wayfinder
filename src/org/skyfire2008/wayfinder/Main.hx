@@ -1,5 +1,7 @@
 package org.skyfire2008.wayfinder;
 
+import haxe.Json;
+
 import js.Lib;
 import js.html.Blob;
 import js.html.MouseEvent;
@@ -10,10 +12,10 @@ import js.html.URL;
 import knockout.Knockout;
 import knockout.Observable;
 
+import org.skyfire2008.wayfinder.geom.IntPoint;
 import org.skyfire2008.wayfinder.path.Pathfinder;
 import org.skyfire2008.wayfinder.path.FlowField;
 import org.skyfire2008.wayfinder.path.ThetaStar;
-import org.skyfire2008.wayfinder.geom.IntPoint;
 import org.skyfire2008.wayfinder.path.NavMesh;
 import org.skyfire2008.wayfinder.path.Map;
 import org.skyfire2008.wayfinder.path.AStar;
@@ -22,7 +24,8 @@ import org.skyfire2008.wayfinder.mapGen.Random;
 import org.skyfire2008.wayfinder.mapGen.Generator;
 import org.skyfire2008.wayfinder.mapGen.Cave;
 import org.skyfire2008.wayfinder.mapGen.Maze;
-import org.skyfire2008.wayfinder.util.Util;
+import org.skyfire2008.wayfinder.mapGen.Empty;
+import org.skyfire2008.wayfinder.test.TestCase.TestCaseDef;
 
 using Lambda;
 
@@ -59,9 +62,10 @@ class ViewModel {
 	public var message: Observable<String>;
 
 	public var generators: Array<GenInfo> = [
-		{name: "Random", gen: new Random(0.25)},
+		{name: "Random", gen: new Random(0.3)},
 		{name: "Cave", gen: new Cave(0.5, 3, 4, 6)},
-		{name: "Maze", gen: new Maze()}
+		{name: "Maze", gen: new Maze()},
+		{name: "Empty", gen: new Empty()}
 	];
 	public var generator: Observable<GenInfo>;
 	private var map: Map;
@@ -120,6 +124,7 @@ class ViewModel {
 			removing.set(isWall.get());
 			if (removing.get() == isWall.get()) {
 				isWall.set(!isWall.get());
+				map.walls[y][x] = isWall.get();
 			}
 		}
 	}
@@ -128,6 +133,7 @@ class ViewModel {
 		var isWall = walls.get()[y][x];
 		if (drawing && isWall.get() == removing.get()) {
 			isWall.set(!isWall.get());
+			map.walls[y][x] = isWall.get();
 		}
 	}
 
@@ -137,7 +143,7 @@ class ViewModel {
 				return elem.get();
 			});
 		});
-		this.navMesh.set(new NavMesh(walls));
+		this.navMesh.set(NavMesh.makeNavMesh(walls));
 	}
 
 	public function genNavMeshImproved() {
@@ -147,7 +153,7 @@ class ViewModel {
 			});
 		});
 
-		this.navMesh.set(new NavMesh(walls, true));
+		this.navMesh.set(NavMesh.makeNavMesh(walls, true));
 	}
 
 	public function generateMap() {
@@ -316,6 +322,32 @@ class ViewModel {
 		a.click();
 	}
 
+	public function exportTestCase() {
+		var navMesh = this.navMesh.get();
+
+		var points: Array<IntPointDef> = [];
+		if (this.startPos.get() != null) {
+			points.push(IntPoint.exportDef(this.startPos.get()));
+		}
+		if (this.endPos.get() != null) {
+			points.push(IntPoint.exportDef(this.endPos.get()));
+		}
+
+		var result: TestCaseDef = {
+			map: Map.exportDef(this.map),
+			navMesh: navMesh != null ? NavMesh.exportDef(navMesh) : null,
+			points: points
+		};
+
+		var resultText = Json.stringify(result, null, "  ");
+
+		var a = Browser.document.createAnchorElement();
+		a.download = "testCase.json";
+		a.href = URL.createObjectURL(new Blob([resultText]));
+		a.addEventListener("click", () -> Browser.window.setTimeout(() -> URL.revokeObjectURL(a.href), 1000));
+		a.click();
+	}
+
 	private function calcAndSetPathLines(points: Array<IntPoint>, time: Float) {
 		var resultingPath: Array<Line> = [];
 		var pathLength: Float = 0;
@@ -357,7 +389,7 @@ class Main {
 	}
 
 	public static function init() {
-		var viewModel = new ViewModel(59, 59, 16, 16);
+		var viewModel = new ViewModel(59, 59, 8, 8);
 		Knockout.applyBindings(viewModel);
 	}
 }

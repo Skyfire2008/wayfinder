@@ -31,7 +31,7 @@ class Main {
 			tiles.push(current);
 		}
 
-		var map = new Map(tiles, 1, 1);
+		var map = new Map(tiles);
 
 		var regions: Array<Array<IntRect>> = [for (y in 0...height) [for (x in 0...width) null]];
 

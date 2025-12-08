@@ -117,16 +117,20 @@
 		<div class="column buttons">
 			<button data-bind="click: setStart">Set start</button>
 			<button data-bind="click: setEnd">Set end</button>
-			<button data-bind="click: genNavMesh">Generate nav mesh</button>
-			<button data-bind="click: genNavMeshImproved">Generate improved nav mesh</button>
-			<button data-bind="click: genFlowField">Generate flow field</button>
+			<hr style="width: -webkit-fill-available;">
 			<button data-bind="click: findAPath">Find A* path</button>
 			<button data-bind="click: findThetaPath">Find θ* path</button>
+			<hr style="width: -webkit-fill-available;">
+			<button data-bind="click: genNavMesh">Generate nav mesh</button>
+			<button data-bind="click: genNavMeshImproved">Generate improved nav mesh</button>
 			<button data-bind="click: findAPathNavMesh">Find A* path with navmesh</button>
 			<button data-bind="click: findThetaPathNavMesh">Find θ* path with navmesh</button>
+			<hr style="width: -webkit-fill-available;">
+			<button data-bind="click: genFlowField">Generate flow field</button>
 			<button data-bind="click: findFlowFieldPath">Find path using flow field</button>
 			<hr style="width: -webkit-fill-available;">
 			<button data-bind="click: exportSvg">Export SVG</button>
+			<button data-bind="click: exportTestCase">Export test case</button>
 		</div>
 
 	</div>

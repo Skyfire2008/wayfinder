@@ -104,6 +104,6 @@ class Maze implements Generator {
 			}
 		}
 
-		return new Map(walls, 20, 20);
+		return new Map(walls);
 	}
 }

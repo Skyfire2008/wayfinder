@@ -4,24 +4,47 @@ import haxe.ds.IntMap;
 
 import org.skyfire2008.wayfinder.geom.IntPoint;
 
+/**
+ * Map definition for exporting/importing as JSON
+ */
+typedef MapDef = {
+	var walls: String;
+	var width: Int;
+	var height: Int;
+};
+
 class Map {
 	public var walls(default, null): Array<Array<Bool>>;
-	public var tileWidth(default, null): Float;
-	public var tileHeight(default, null): Float;
 
 	public var width(get, null): Int;
 	public var height(get, null): Int;
 
-	public function new(walls: Array<Array<Bool>>, tileWidth: Float, tileHeight: Float) {
+	public function new(walls: Array<Array<Bool>>) {
 		this.walls = walls;
-		this.tileWidth = tileWidth;
-		this.tileHeight = tileHeight;
+	}
+
+	public static function exportDef(map: Map): MapDef {
+		var wallString = "";
+
+		for (y in 0...map.height) {
+			for (x in 0...map.width) {
+				wallString = wallString + (map.walls[y][x] ? "1" : "0");
+			}
+		}
+
+		return {
+			walls: wallString,
+			width: map.width,
+			height: map.height
+		}
 	}
 
 	/**
 	 * Makes sure that all the non-wall components are connected
 	 */
 	public function ensureConnectivity() {
+
+		// TODO: use a queue instead of recursion when growing components
 		var componentId = 1;
 
 		var compGrid: Array<Array<Int>> = [];
