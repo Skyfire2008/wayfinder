@@ -4,7 +4,7 @@ import polygonal.ds.Prioritizable;
 
 import org.skyfire2008.wayfinder.geom.IntPoint;
 
-abstract class PathNode<T:PathNode<T>> implements Prioritizable {
+class PathNode implements Prioritizable {
 	// prioritizable properties
 	public var priority(default, null): Float;
 	public var position(default, null): Int;
@@ -12,7 +12,7 @@ abstract class PathNode<T:PathNode<T>> implements Prioritizable {
 	/**
 	 * Previous node in path
 	 */
-	public var prevInPath(default, null): T = null;
+	public var prevInPath(default, null): PathNode = null;
 
 	/**
 	 * Distance from start node, init to infinity, since it's not known at the beginning
@@ -32,10 +32,11 @@ abstract class PathNode<T:PathNode<T>> implements Prioritizable {
 	/**
 	 * Neighbouring nodes
 	 */
-	public var neighbours(default, null): Array<T>;
+	public var neighbours(default, null): Array<PathNode>;
 
 	public function new() {
 		// initialize priority
+		this.neighbours = [];
 		this.priority = h + g;
 	}
 
@@ -49,7 +50,7 @@ abstract class PathNode<T:PathNode<T>> implements Prioritizable {
 		this.priority = h + g;
 	}
 
-	public function setPrev(prev: T, distToPrev: Float) {
+	public function setPrev(prev: PathNode, distToPrev: Float) {
 		this.prevInPath = prev;
 		this.g = prev.g + distToPrev;
 		this.priority = this.g + this.h;
@@ -62,14 +63,14 @@ abstract class PathNode<T:PathNode<T>> implements Prioritizable {
 	}
 }
 
-interface PathGraph<T:PathNode<T>> {
+interface PathGraph {
 
 	/**
 	 * Gets pathfinding node at given coordinates
 	 * @param pos 			coordinates
 	 * @return 				Node
 	 */
-	public function getNode(pos: IntPoint): T;
+	public function getNode(pos: IntPoint): PathNode;
 
 	/**
 	 * Checks whether p0 is directly reachable from p1 without collisions with walls
@@ -91,6 +92,6 @@ interface Pathfinder {
 	 * @param pathGraph 	graph to pathfind in
 	 * @return 				array of points
 	 */
-	public function findPath<T: PathNode<T>>(start: IntPoint, end: IntPoint, pathGraph: PathGraph<T>): Array<IntPoint>;
+	public function findPath(start: IntPoint, end: IntPoint, pathGraph: PathGraph): Array<IntPoint>;
 
 }

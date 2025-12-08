@@ -15,7 +15,8 @@ using Lambda;
 typedef EdgeDef = {
 	var p0: IntPointDef;
 	var p1: IntPointDef;
-	var neighbourId: Int;
+	var node0: Int;
+	var node1: Int;
 };
 
 typedef NodeDef = {
@@ -23,14 +24,13 @@ typedef NodeDef = {
 	var y: Int;
 	var width: Int;
 	var height: Int;
-	var edges: Array<EdgeDef>;
 };
 
 typedef NavMeshDef = {
 	var nodes: Array<NodeDef>;
 };
 
-class NavMesh implements PathGraph<Node> {
+class NavMesh implements PathGraph {
 	private var nodes: Array<Node>;
 
 	private var nodeGrid: Array<Array<Int>>;
@@ -73,25 +73,28 @@ class NavMesh implements PathGraph<Node> {
 	}
 
 	public static function exportDef(navmesh: NavMesh): NavMeshDef {
-		var nodes: Array<NodeDef> = navmesh.nodes.map((node) -> {
-			return {
-				x: node.rect.x,
-				y: node.rect.y,
-				width: node.rect.width,
-				height: node.rect.height,
-				edges: node.edges.map((edge) -> {
-					return {
-						p0: IntPoint.exportDef(edge.v0),
-						p1: IntPoint.exportDef(edge.v1),
-						neighbourId: edge.neighbourId
-					};
-				})
-			}
-		});
+		/*
+			var nodes: Array<NodeDef> = navmesh.nodes.map((node) -> {
+				return {
+					x: node.rect.x,
+					y: node.rect.y,
+					width: node.rect.width,
+					height: node.rect.height,
+					edges: node.edges.map((edge) -> {
+						return {
+							p0: IntPoint.exportDef(edge.v0),
+							p1: IntPoint.exportDef(edge.v1),
+							neighbourId: edge.neighbourId
+						};
+					})
+				}
+			});
 
-		return {
-			nodes: nodes
-		};
+			return {
+				nodes: nodes
+			};
+		 */
+		return null;
 	}
 
 	/**
@@ -109,7 +112,7 @@ class NavMesh implements PathGraph<Node> {
 		var nodes = [];
 		var nodeGrid = [for (y in 0...height) [for (x in 0...width) -1]];
 		for (rect in rects) {
-			var node = new Node(nodes.length, rect, []);
+			var node = new Node(nodes.length, rect);
 			for (x in rect.x...rect.right) {
 				for (y in rect.y...rect.bottom) {
 					nodeGrid[y][x] = nodes.length;
@@ -137,11 +140,9 @@ class NavMesh implements PathGraph<Node> {
 
 						var p0 = new IntPoint(x, y0);
 						var p1 = new IntPoint(x, y1);
-						node.edges.push(new Edge(p0, p1, other.id));
-						other.edges.push(new Edge(p0, p1, node.id));
-
-						node.neighbours.push(other);
-						other.neighbours.push(node);
+						var edge = new Edge(p0, p1, node, other);
+						node.neighbours.push(edge);
+						other.neighbours.push(edge);
 					}
 				}
 			}
@@ -161,11 +162,9 @@ class NavMesh implements PathGraph<Node> {
 
 						var p0 = new IntPoint(x0, y);
 						var p1 = new IntPoint(x1, y);
-						node.edges.push(new Edge(p0, p1, other.id));
-						other.edges.push(new Edge(p0, p1, node.id));
-
-						node.neighbours.push(other);
-						other.neighbours.push(node);
+						var edge = new Edge(p0, p1, node, other);
+						node.neighbours.push(edge);
+						other.neighbours.push(edge);
 					}
 				}
 			}

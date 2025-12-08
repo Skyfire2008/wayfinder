@@ -12,7 +12,7 @@ import org.skyfire2008.wayfinder.path.Pathfinder.PathNode;
 class ThetaStar implements Pathfinder {
 	public function new() {}
 
-	public function findPath<T: PathNode<T>>(start: IntPoint, end: IntPoint, graph: PathGraph<T>): Array<IntPoint> {
+	public function findPath(start: IntPoint, end: IntPoint, graph: PathGraph): Array<IntPoint> {
 		var startNode = graph.getNode(start);
 		if (startNode == null) {
 			throw "Start node is undefined or a wall";
@@ -28,8 +28,8 @@ class ThetaStar implements Pathfinder {
 		}
 
 		// initialize closed set and priority queue
-		var closed = new Set<T>();
-		var queue = new PriorityQueue<T>(65536, true);
+		var closed = new Set<PathNode>();
+		var queue = new PriorityQueue<PathNode>(65536, true);
 
 		startNode.setG(0);
 		// set startNode's previous node to itself so that there's no need to check if node has a previous for visibility check later
@@ -61,7 +61,7 @@ class ThetaStar implements Pathfinder {
 					neighbour.setH(IntPoint.distance(end, neighbour.pos));
 				}
 
-				var prev: T = null;
+				var prev: PathNode = null;
 				// if neighbour visible from current's previous node...
 				if (graph.checkVisibility(current.prevInPath.pos, neighbour.pos)) {
 					// connect neigbour to previous node instead

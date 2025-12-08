@@ -4,18 +4,15 @@ import org.skyfire2008.wayfinder.geom.IntPoint;
 import org.skyfire2008.wayfinder.path.Pathfinder.PathGraph;
 import org.skyfire2008.wayfinder.path.Pathfinder.PathNode;
 
-class GridNode extends PathNode<GridNode> {
+class GridNode extends PathNode {
 	public function new(pos: IntPoint) {
 		super();
+		this.neighbours = [];
 		this.pos = pos;
-	}
-
-	public function setNeighbours(neighbours: Array<GridNode>) {
-		this.neighbours = neighbours;
 	}
 }
 
-class GridGraph implements PathGraph<GridNode> {
+class GridGraph implements PathGraph {
 	private var grid: Array<Array<GridNode>>;
 
 	public function new(walls: Array<Array<Bool>>) {
@@ -45,34 +42,31 @@ class GridGraph implements PathGraph<GridNode> {
 
 		// calculate node neighbours
 		for (node in nodes) {
-			var neighbours: Array<GridNode> = [];
 
 			if (node.pos.x < grid[0].length - 1) {
 				var neighbour = grid[node.pos.y][node.pos.x + 1];
 				if (neighbour != null) {
-					neighbours.push(neighbour);
+					node.neighbours.push(neighbour);
 				}
 			}
 			if (node.pos.x > 0) {
 				var neighbour = grid[node.pos.y][node.pos.x - 1];
 				if (neighbour != null) {
-					neighbours.push(neighbour);
+					node.neighbours.push(neighbour);
 				}
 			}
 			if (node.pos.y > 0) {
 				var neighbour = grid[node.pos.y - 1][node.pos.x];
 				if (neighbour != null) {
-					neighbours.push(neighbour);
+					node.neighbours.push(neighbour);
 				}
 			}
 			if (node.pos.y < grid.length - 1) {
 				var neighbour = grid[node.pos.y + 1][node.pos.x];
 				if (neighbour != null) {
-					neighbours.push(neighbour);
+					node.neighbours.push(neighbour);
 				}
 			}
-
-			node.setNeighbours(neighbours);
 		}
 	}
 

@@ -411,7 +411,7 @@ class Main {
 	}
 
 	public static function init() {
-		var viewModel = new ViewModel(59, 59, 8, 8);
+		var viewModel = new ViewModel(59, 59, 16, 16);
 		Knockout.applyBindings(viewModel);
 	}
 }

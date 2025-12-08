@@ -12,7 +12,7 @@ import org.skyfire2008.wayfinder.path.Pathfinder.PathNode;
 class AStar implements Pathfinder {
 	public function new() {}
 
-	public function findPath<T: PathNode<T>>(start: IntPoint, end: IntPoint, graph: PathGraph<T>): Array<IntPoint> {
+	public function findPath(start: IntPoint, end: IntPoint, graph: PathGraph): Array<IntPoint> {
 		var startNode = graph.getNode(start);
 		if (startNode == null) {
 			throw "Start node is undefined or a wall";
@@ -28,8 +28,8 @@ class AStar implements Pathfinder {
 		}
 
 		// initialize closed set and priority queue
-		var closed = new Set<T>();
-		var queue = new PriorityQueue<T>(65536, true);
+		var closed = new Set<PathNode>();
+		var queue = new PriorityQueue<PathNode>(65536, true);
 
 		startNode.setG(0);
 		queue.enqueue(startNode);
