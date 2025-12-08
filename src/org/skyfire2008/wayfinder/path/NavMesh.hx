@@ -12,12 +12,18 @@ import org.skyfire2008.wayfinder.util.Util;
 
 using Lambda;
 
+typedef EdgeDef = {
+	var p0: IntPointDef;
+	var p1: IntPointDef;
+	var neighbourId: Int;
+};
+
 typedef NodeDef = {
 	var x: Int;
 	var y: Int;
 	var width: Int;
 	var height: Int;
-	var neighbours: Array<Int>;
+	var edges: Array<EdgeDef>;
 };
 
 typedef NavMeshDef = {
@@ -34,6 +40,38 @@ class NavMesh implements PathGraph<Node> {
 		this.nodeGrid = nodeGrid;
 	}
 
+	public static function importDef(def: NavMeshDef, width: Int, height: Int): NavMesh {
+		// TODO: complete
+
+		/*
+			var nodes: Array<Node> = [];
+
+			var nodeGrid: Array<Array<Int>> = [];
+			for (y in 0...height) {
+				var row: Array<Int> = [];
+				for (x in 0...width) {
+					row.push(-1);
+				}
+				nodeGrid.push(row);
+			}
+
+			var nodeId = 0;
+			for (node in def.nodes) {
+				var current = new Node(nodeId++, new IntRect(node.x, node.y, node.width, node.height), []);
+				for (edge in node.edges) {
+					current.edges.push(new Edge(new IntPoint()))
+				}
+
+				nodes.push(current);
+
+			}
+
+			return new NavMesh(nodes, nodeGrid);
+		 */
+
+		return null;
+	}
+
 	public static function exportDef(navmesh: NavMesh): NavMeshDef {
 		var nodes: Array<NodeDef> = navmesh.nodes.map((node) -> {
 			return {
@@ -41,7 +79,13 @@ class NavMesh implements PathGraph<Node> {
 				y: node.rect.y,
 				width: node.rect.width,
 				height: node.rect.height,
-				neighbours: node.neighbours.map((neighbor) -> neighbor.id)
+				edges: node.edges.map((edge) -> {
+					return {
+						p0: IntPoint.exportDef(edge.v0),
+						p1: IntPoint.exportDef(edge.v1),
+						neighbourId: edge.neighbourId
+					};
+				})
 			}
 		});
 

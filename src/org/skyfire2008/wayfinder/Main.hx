@@ -1,12 +1,16 @@
 package org.skyfire2008.wayfinder;
 
+import js.html.FileReader;
+
 import haxe.Json;
 
 import js.Lib;
+import js.Browser;
 import js.html.Blob;
 import js.html.MouseEvent;
+import js.html.Event;
+import js.html.InputElement;
 import js.html.svg.SVGElement;
-import js.Browser;
 import js.html.URL;
 
 import knockout.Knockout;
@@ -61,6 +65,8 @@ class ViewModel {
 	public var flowField: Observable<FlowField>;
 	public var message: Observable<String>;
 
+	public var runTestCase: Observable<Bool>;
+
 	public var generators: Array<GenInfo> = [
 		{name: "Random", gen: new Random(0.3)},
 		{name: "Cave", gen: new Cave(0.5, 3, 4, 6)},
@@ -92,6 +98,8 @@ class ViewModel {
 		this.path = Knockout.observable([]);
 		this.flowField = Knockout.observable(null);
 		this.message = Knockout.observable(null);
+
+		this.runTestCase = Knockout.observable(true);
 
 		this.generator = Knockout.observable(generators[0]);
 		this.walls = Knockout.observable();
@@ -346,6 +354,20 @@ class ViewModel {
 		a.href = URL.createObjectURL(new Blob([resultText]));
 		a.addEventListener("click", () -> Browser.window.setTimeout(() -> URL.revokeObjectURL(a.href), 1000));
 		a.click();
+	}
+
+	public function importTestCase(_: Any, e: Event) {
+		var elem: InputElement = cast e.target;
+
+		var fr = new FileReader();
+		fr.addEventListener("load", () -> {
+			var testCaseDef: TestCaseDef = Json.parse(fr.result);
+
+			if (runTestCase) {
+				// TODO: complete
+			}
+		});
+		fr.readAsText(elem.files[0]);
 	}
 
 	private function calcAndSetPathLines(points: Array<IntPoint>, time: Float) {

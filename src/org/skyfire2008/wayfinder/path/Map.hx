@@ -23,6 +23,30 @@ class Map {
 		this.walls = walls;
 	}
 
+	public static function importDef(def: MapDef): Map {
+		var walls: Array<Array<Bool>> = [];
+
+		var i = 0;
+		for (y in 0...def.height) {
+			var row: Array<Bool> = [];
+			for (x in 0...def.width) {
+				switch (def.walls.charAt(i)) {
+					case "0":
+						row.push(false);
+					case "1":
+						row.push(true);
+					default:
+						throw 'Illegal wall character ${def.walls.charAt(i)} at ${x}, ${y} in map definition';
+				}
+
+				i++;
+			}
+			walls.push(row);
+		}
+
+		return new Map(walls);
+	}
+
 	public static function exportDef(map: Map): MapDef {
 		var wallString = "";
 

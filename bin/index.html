@@ -131,6 +131,14 @@
 			<hr style="width: -webkit-fill-available;">
 			<button data-bind="click: exportSvg">Export SVG</button>
 			<button data-bind="click: exportTestCase">Export test case</button>
+			<div>
+				<label>Import test case:</label>
+				<input type="file" data-bind="event: { change: importTestCase}"></input>
+			</div>
+			<div>
+				<label>Run test case:</label>
+				<input data-bind="checked: runTestCase" type="checkbox"></input>
+			</div>
 		</div>
 
 	</div>
