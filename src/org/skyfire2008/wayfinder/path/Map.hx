@@ -74,6 +74,8 @@ class Map {
 		var compGrid: Array<Array<Int>> = [];
 		var compStartMap = new IntMap<IntPoint>();
 
+		var queue: Array<() -> Void> = [];
+
 		var growComponent: (x: Int, y: Int) -> Void;
 		growComponent = (x: Int, y: Int) -> {
 			if (x < 0 || x >= width || y < 0 || y >= height || compGrid[y][x] != 0) {
@@ -81,10 +83,10 @@ class Map {
 			}
 
 			compGrid[y][x] = componentId;
-			growComponent(x - 1, y);
-			growComponent(x + 1, y);
-			growComponent(x, y - 1);
-			growComponent(x, y + 1);
+			queue.push(growComponent.bind(x - 1, y));
+			queue.push(growComponent.bind(x + 1, y));
+			queue.push(growComponent.bind(x, y - 1));
+			queue.push(growComponent.bind(x, y + 1));
 		};
 
 		// init the component grid
@@ -104,6 +106,9 @@ class Map {
 				if (cell == 0) {
 					compStartMap.set(componentId, new IntPoint(x, y));
 					growComponent(x, y);
+					while (queue.length > 0) {
+						queue.shift()();
+					}
 					componentId++;
 				}
 			}

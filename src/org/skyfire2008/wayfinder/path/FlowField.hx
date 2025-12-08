@@ -48,19 +48,6 @@ class FlowField {
 		while (queue.length > 0) {
 			queue.shift()();
 		}
-
-		/*var text = "\n";
-			for (row in directions) {
-				for (dir in row) {
-					if (dir == null) {
-						text += "(  ,   ) ";
-					} else {
-						text += '(${dir.x >= 0 ? "+" + dir.x : "" + dir.x}, ${dir.y >= 0 ? "+" + dir.y : "" + dir.y}) ';
-					}
-				}
-				text += "\n";
-			}
-			trace(text); */
 	}
 
 	public function getPath(start: IntPoint): Array<IntPoint> {

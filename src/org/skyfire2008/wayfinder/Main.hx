@@ -65,8 +65,6 @@ class ViewModel {
 	public var flowField: Observable<FlowField>;
 	public var message: Observable<String>;
 
-	public var runTestCase: Observable<Bool>;
-
 	public var generators: Array<GenInfo> = [
 		{name: "Random", gen: new Random(0.3)},
 		{name: "Cave", gen: new Cave(0.5, 3, 4, 6)},
@@ -98,8 +96,6 @@ class ViewModel {
 		this.path = Knockout.observable([]);
 		this.flowField = Knockout.observable(null);
 		this.message = Knockout.observable(null);
-
-		this.runTestCase = Knockout.observable(true);
 
 		this.generator = Knockout.observable(generators[0]);
 		this.walls = Knockout.observable();
@@ -363,9 +359,32 @@ class ViewModel {
 		fr.addEventListener("load", () -> {
 			var testCaseDef: TestCaseDef = Json.parse(fr.result);
 
-			if (runTestCase) {
-				// TODO: complete
+			// import map
+			this.map = Map.importDef(testCaseDef.map);
+			var newWalls = [
+				for (y in 0...map.height) [
+					for (x in 0...map.width)
+						Knockout.observable(map.walls[y][x])
+				]
+			];
+			this.walls.set(newWalls);
+			this.width.set(map.width);
+			this.height.set(map.height);
+
+			// import navmesh
+			if (testCaseDef.navMesh != null) {
+				this.navMesh.set(NavMesh.importDef(testCaseDef.navMesh, map.width, map.height));
+			} else {
+				this.navMesh.set(null);
 			}
+
+			// reset state
+			this.message.set(null);
+			this.flowField.set(null);
+			this.path.set(null);
+			this.startPos.set(null);
+			this.endPos.set(null);
+
 		});
 		fr.readAsText(elem.files[0]);
 	}

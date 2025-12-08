@@ -6,3 +6,11 @@
 
 # set this to debug NavMesh.checkVisibility(...)
 #--debug
+
+--next 
+-lib hxnodejs
+-js bin/generate.js
+-cp src
+-main org.skyfire2008.wayfinder.test.Main
+-lib polygonal-ds
+-dce full

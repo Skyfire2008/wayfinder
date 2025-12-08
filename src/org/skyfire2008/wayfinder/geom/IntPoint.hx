@@ -15,6 +15,10 @@ class IntPoint {
 		return Math.sqrt(dx * dx + dy * dy);
 	}
 
+	public static function importDef(def: IntPointDef): IntPoint {
+		return new IntPoint(def.x, def.y);
+	}
+
 	public static function exportDef(p: IntPoint): IntPointDef {
 		return {
 			x: p.x,

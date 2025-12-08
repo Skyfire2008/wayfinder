@@ -1,5 +1,7 @@
 package org.skyfire2008.wayfinder.path;
 
+import org.skyfire2008.wayfinder.path.Pathfinder.PathNode;
+
 import js.lib.Set;
 
 import polygonal.ds.PriorityQueue;
@@ -28,6 +30,7 @@ typedef NodeDef = {
 
 typedef NavMeshDef = {
 	var nodes: Array<NodeDef>;
+	var edges: Array<EdgeDef>;
 };
 
 class NavMesh implements PathGraph {
@@ -41,59 +44,78 @@ class NavMesh implements PathGraph {
 	}
 
 	public static function importDef(def: NavMeshDef, width: Int, height: Int): NavMesh {
-		// TODO: complete
+		var nodes: Array<Node> = [];
 
-		/*
-			var nodes: Array<Node> = [];
+		var nodeGrid: Array<Array<Int>> = [];
 
-			var nodeGrid: Array<Array<Int>> = [];
-			for (y in 0...height) {
-				var row: Array<Int> = [];
-				for (x in 0...width) {
-					row.push(-1);
+		// init nodeGrid
+		for (y in 0...height) {
+			var row: Array<Int> = [];
+			for (x in 0...width) {
+				row.push(-1);
+			}
+			nodeGrid.push(row);
+		}
+
+		var nodeId = 0;
+		for (nodeDef in def.nodes) {
+			var current = new Node(nodeId, new IntRect(nodeDef.x, nodeDef.y, nodeDef.width, nodeDef.height));
+			nodes.push(current);
+
+			for (y in nodeDef.y...(nodeDef.y + nodeDef.height)) {
+				for (x in nodeDef.x...(nodeDef.x + nodeDef.width)) {
+					nodeGrid[y][x] = nodeId;
 				}
-				nodeGrid.push(row);
 			}
 
-			var nodeId = 0;
-			for (node in def.nodes) {
-				var current = new Node(nodeId++, new IntRect(node.x, node.y, node.width, node.height), []);
-				for (edge in node.edges) {
-					current.edges.push(new Edge(new IntPoint()))
-				}
+			nodeId++;
+		}
 
-				nodes.push(current);
+		for (edgeDef in def.edges) {
+			var node0 = nodes[edgeDef.node0];
+			var node1 = nodes[edgeDef.node1];
+			var edge = new Edge(IntPoint.importDef(edgeDef.p0), IntPoint.importDef(edgeDef.p1), node0, node1);
+			node0.neighbours.push(edge);
+			node1.neighbours.push(edge);
+		}
 
-			}
-
-			return new NavMesh(nodes, nodeGrid);
-		 */
-
-		return null;
+		return new NavMesh(nodes, nodeGrid);
 	}
 
 	public static function exportDef(navmesh: NavMesh): NavMeshDef {
-		/*
-			var nodes: Array<NodeDef> = navmesh.nodes.map((node) -> {
-				return {
-					x: node.rect.x,
-					y: node.rect.y,
-					width: node.rect.width,
-					height: node.rect.height,
-					edges: node.edges.map((edge) -> {
-						return {
-							p0: IntPoint.exportDef(edge.v0),
-							p1: IntPoint.exportDef(edge.v1),
-							neighbourId: edge.neighbourId
-						};
-					})
-				}
+		var nodes: Array<NodeDef> = [];
+		var edges: Array<EdgeDef> = [];
+		var edgeSet = new Set<PathNode>();
+
+		for (node in navmesh.nodes) {
+			nodes.push({
+				x: node.rect.x,
+				y: node.rect.y,
+				width: node.rect.width,
+				height: node.rect.height,
 			});
 
-			return {
-				nodes: nodes
-			};
-		 */
+			for (neighbour in node.neighbours) {
+				// FIXME: do not use casting!
+				var edge = cast(neighbour, Edge);
+
+				if (!edgeSet.has(neighbour)) {
+					edgeSet.add(neighbour);
+					edges.push({
+						p0: IntPoint.exportDef(edge.p0),
+						p1: IntPoint.exportDef(edge.p1),
+						node0: cast(edge.neighbours[0], Node).id,
+						node1: cast(edge.neighbours[1], Node).id,
+					});
+				}
+			}
+		}
+
+		return {
+			nodes: nodes,
+			edges: edges
+		};
+
 		return null;
 	}
 
