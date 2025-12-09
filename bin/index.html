@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+	<title>Wayfinder</title>
 	<link rel="stylesheet" href="main.css" />
 	<script src="knockout-3.5.1.debug.js"></script>
 	<script src="index.js"></script>
@@ -97,7 +98,7 @@
 
 				<!-- ko if: navMesh() -->
 				<!-- ko foreach: navMesh().nodes -->
-				<rect stroke="red" fill="none" data-bind="attr: {
+				<rect stroke="lime" fill="#ff000080" data-bind="attr: {
 						x: $data.rect.x * $root.tileWidth, 
 						y: $data.rect.y * $root.tileWidth, 
 						width: $data.rect.width * $root.tileWidth, 
@@ -117,18 +118,18 @@
 		<div class="column buttons">
 			<button data-bind="click: setStart">Set start</button>
 			<button data-bind="click: setEnd">Set end</button>
-			<hr style="width: -webkit-fill-available;">
+			<hr>
 			<button data-bind="click: findAPath">Find A* path</button>
 			<button data-bind="click: findThetaPath">Find θ* path</button>
-			<hr style="width: -webkit-fill-available;">
+			<hr>
 			<button data-bind="click: genNavMesh">Generate nav mesh</button>
 			<button data-bind="click: genNavMeshImproved">Generate improved nav mesh</button>
 			<button data-bind="click: findAPathNavMesh">Find A* path with navmesh</button>
 			<button data-bind="click: findThetaPathNavMesh">Find θ* path with navmesh</button>
-			<hr style="width: -webkit-fill-available;">
+			<hr>
 			<button data-bind="click: genFlowField">Generate flow field</button>
 			<button data-bind="click: findFlowFieldPath">Find path using flow field</button>
-			<hr style="width: -webkit-fill-available;">
+			<hr>
 			<button data-bind="click: exportSvg">Export SVG</button>
 			<button data-bind="click: exportTestCase">Export map</button>
 			<div>

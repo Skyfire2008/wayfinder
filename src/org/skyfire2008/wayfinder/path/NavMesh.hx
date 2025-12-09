@@ -370,7 +370,7 @@ class NavMesh implements PathGraph {
 		}
 
 		var addedRects: Array<IntRect> = [];
-		var quadTree = new QuadTree(new IntRect(0, 0, width, height), 4);
+		// var quadTree = new QuadTree(new IntRect(0, 0, width, height), 4);
 		// fetch rects from priority queue
 		while (!queue.empty()) {
 			var rect = queue.dequeue();
@@ -378,24 +378,24 @@ class NavMesh implements PathGraph {
 			var skip = false;
 			var requeue = false;
 
-			if (quadTree.pointOccupied(new IntPoint(rect.x, rect.y))) {
-				skip = true;
-			} else {
-				var current = quadTree.queryOne(rect);
-				if (current != null) {
-					requeue = true;
+			/*if (quadTree.pointOccupied(new IntPoint(rect.x, rect.y))) {
+					skip = true;
+				} else {
+					var current = quadTree.queryOne(rect);
+					if (current != null) {
+						requeue = true;
 
-					var newWidth = current.x - rect.x;
-					var newHeight = current.y - rect.y;
-					if (newWidth * rect.height > newHeight * rect.width) {
-						rect.setWidth(newWidth);
-					} else {
-						rect.setHeight(newHeight);
+						var newWidth = current.x - rect.x;
+						var newHeight = current.y - rect.y;
+						if (newWidth * rect.height > newHeight * rect.width) {
+							rect.setWidth(newWidth);
+						} else {
+							rect.setHeight(newHeight);
+						}
 					}
-				}
-			}
+			}*/
 
-			/*for (current in addedRects) {
+			for (current in addedRects) {
 				// if rect's origin is already covered, skip
 				if (current.contains(rect.x, rect.y)) {
 					skip = true;
@@ -414,7 +414,7 @@ class NavMesh implements PathGraph {
 						rect.setHeight(newHeight);
 					}
 				}
-			}*/
+			}
 
 			if (skip) {
 				continue;
@@ -426,7 +426,7 @@ class NavMesh implements PathGraph {
 			}
 
 			addedRects.push(rect);
-			quadTree.add(rect);
+			// quadTree.add(rect);
 		}
 
 		return addedRects;

@@ -17,7 +17,14 @@ import org.skyfire2008.wayfinder.path.NavMesh;
 import org.skyfire2008.wayfinder.path.Map;
 
 class Generate {
-	public static var sizeMap: StringMap<Int> = ["small" => 50, "medium" => 200, "500x500" => 500, "large" => 1000];
+	public static var sizeMap: StringMap<Int> = [
+		"small" => 50,
+		"50x50" => 50,
+		"medium" => 200,
+		"250x250" -> 250,
+		"500x500" => 500,
+		"large" => 1000
+	];
 	public static var generatorMap: StringMap<Generator> = [
 		"empty" => new Empty(),
 		"random" => new Random(0.3),
@@ -97,9 +104,9 @@ class Generate {
 				var start = size - (1 + dist);
 
 				for (x in start...size) {
-					if (!map.isWall(x, dist)) {
+					if (!map.isWall(x, start)) {
 						p1.x = x;
-						p1.y = dist;
+						p1.y = start;
 						found = true;
 						break;
 					}
@@ -110,8 +117,8 @@ class Generate {
 				}
 
 				for (y in start...size) {
-					if (!map.isWall(dist, y)) {
-						p1.x = dist;
+					if (!map.isWall(start, y)) {
+						p1.x = start;
 						p1.y = y;
 						found = true;
 						break;

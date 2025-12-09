@@ -24,7 +24,7 @@ class ThetaStar implements Pathfinder {
 		}
 
 		if (start.x == end.x && start.y == end.y) {
-			throw "Start position is the same as end position";
+			return [start, end];
 		}
 
 		// initialize closed set and priority queue

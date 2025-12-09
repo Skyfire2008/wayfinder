@@ -4,6 +4,10 @@
 	align-items: flex-start;
 }
 
+hr {
+	width: -webkit-fill-available;
+}
+
 .row {
 	display: flex;
 	flex-direction: row;

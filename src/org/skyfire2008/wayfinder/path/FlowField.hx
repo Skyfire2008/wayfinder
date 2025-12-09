@@ -11,6 +11,10 @@ class FlowField {
 		this.directions = [];
 		this.end = end;
 
+		if (walls[end.y][end.x]) {
+			throw "End node is a wall";
+		}
+
 		for (row in walls) {
 			var dirRow: Array<IntPoint> = [];
 			var distRow: Array<Float> = [];
@@ -55,6 +59,10 @@ class FlowField {
 
 		if (directions[start.y][start.x] == null) {
 			throw "End unreachable";
+		}
+
+		if (start.x == end.x && start.y == end.y) {
+			return [start, end];
 		}
 
 		var current = start.copy();

@@ -1,5 +1,6 @@
 package org.skyfire2008.wayfinder.test;
 
+import org.skyfire2008.wayfinder.path.FlowField;
 import org.skyfire2008.wayfinder.path.GridGraph;
 
 import haxe.Json;
@@ -44,15 +45,75 @@ class TestRunner {
 	private static var aStar = new AStar();
 	private static var thetaStar = new ThetaStar();
 
-	private static function runTest(pathfinder: Pathfinder, graph: PathGraph): Float {
+	// INFO: how many times each test runs
+	private static var times = 100;
 
+	// INFO: how many units are used for mass tests
+	private static var units = 16;
+
+	/**
+	 * Finds path from points[0] to points[1] 100 times and calculates average time
+	 * @param pathfinder 	path finding algorithm to use
+	 * @param graph 		map graph
+	 * @return 				average time
+	 */
+	private static function runTest(pathfinder: Pathfinder, graph: PathGraph): Float {
 		var totalTime = 0.0;
-		for (i in 0...1000) {
+		for (i in 0...times) {
 			var timeStart = Browser.window.performance.now();
 			var path = pathfinder.findPath(points[0], points[1], graph);
 			totalTime += Browser.window.performance.now() - timeStart;
 		}
-		return totalTime / 1000;
+		return totalTime / times;
+	}
+
+	private static function runMassTest(pathfinder: Pathfinder, graph: PathGraph): Float {
+		var totalTime = 0.0;
+		for (i in 0...times) {
+
+			for (j in 1...points.length) {
+				var timeStart = Browser.window.performance.now();
+				var path = pathfinder.findPath(points[0], points[j], graph);
+				totalTime += Browser.window.performance.now() - timeStart;
+			}
+
+		}
+		return totalTime / times;
+	}
+
+	private static function runMassFlowFieldTest(): Float {
+		var totalTime = 0.0;
+		for (i in 0...times) {
+			var flowField = new FlowField(map.walls, points[0]);
+
+			for (j in 1...points.length) {
+				var timeStart = Browser.window.performance.now();
+				var path = flowField.getPath(points[j]);
+				totalTime += Browser.window.performance.now() - timeStart;
+			}
+
+		}
+		return totalTime / times;
+	}
+
+	private static function runSingleFlowFieldTest(): Float {
+		var totalTime = 0.0;
+		for (i in 0...times) {
+			var timeStart = Browser.window.performance.now();
+			var flowField = new FlowField(map.walls, points[1]);
+			var path = flowField.getPath(points[0]);
+			totalTime += Browser.window.performance.now() - timeStart;
+		}
+		return totalTime / times;
+	}
+
+	private static function appendHeader(fileName: String) {
+		var hr = Browser.document.createElement("hr");
+		var h2 = Browser.document.createElement("h2");
+		h2.textContent = fileName;
+
+		resultDiv.appendChild(hr);
+		resultDiv.appendChild(h2);
 	}
 
 	private static function appendTime(description: String, time: Float): Void {
@@ -78,31 +139,50 @@ class TestRunner {
 					newNM = NavMesh.importDef(test.newNM, map.width, map.height);
 					points = test.points.map((p) -> IntPoint.importDef(p));
 
-					// A* ON GRID:
-					var aStarTime = runTest(aStar, grid);
+					appendHeader(fileInput.files[0].name);
 
-					// THETA* ON GRID
-					var thetaStarTime = runTest(thetaStar, grid);
+					// A* ON GRID:
+					appendTime("A* on grid", runTest(aStar, grid));
+
+					// MASS A* ON GRID:
+					appendTime('A* with ${points.length - 1} units on grid', runMassTest(aStar, grid));
+
+					// THETA* ON GRID:
+					appendTime("Theta* on grid", runTest(thetaStar, grid));
+
+					// MASS THETA* ON GRID:
+					appendTime('Theta* with ${points.length - 1} units on grid', runMassTest(thetaStar, grid));
 
 					// A* ON OLD NAVMESH:
-					var aStarOldNMTime = runTest(aStar, oldNM);
+					appendTime("A* on old nav mesh", runTest(aStar, oldNM));
 
-					// A* ON NEW NAVMESH:
-					var aStarNewNMTime = runTest(aStar, newNM);
+					// MASS A* ON OLD NAVMESH:
+					appendTime('A* with ${points.length - 1} units on old nav mesh', runMassTest(thetaStar, oldNM));
 
 					// THETA* ON OLD NAVMESH:
-					var thetaStarOldNMTime = runTest(thetaStar, oldNM);
+					appendTime("Theta* on old nav mesh", runTest(thetaStar, oldNM));
+
+					// MASS THETA* ON OLD NAV MESH
+					appendTime('Theta* with ${points.length - 1} units on old nav mesh', runMassTest(thetaStar, oldNM));
+
+					// A* ON NEW NAVMESH:
+					appendTime("A* on new nav mesh", runTest(aStar, newNM));
+
+					// MASS A* ON NEW NAVMESH:
+					appendTime('A* with ${points.length - 1} units on new nav mesh', runMassTest(aStar, newNM));
 
 					// THETA* ON NEW NAVMESH:
-					var thetaStarNewNMTime = runTest(thetaStar, newNM);
+					appendTime("Theta* on new nav mesh", runTest(thetaStar, newNM));
 
-					// append result to div
-					appendTime("A* on grid", aStarTime);
-					appendTime("Theta* on grid", thetaStarTime);
-					appendTime("A* on old nav mesh", aStarOldNMTime);
-					appendTime("A* on new nav mesh", aStarNewNMTime);
-					appendTime("Theta* on old nav mesh", thetaStarOldNMTime);
-					appendTime("Theta* on new nav mesh", thetaStarNewNMTime);
+					// MASS THETA* ON NEW NAVMESH:
+					appendTime('Theta* with ${points.length - 1} units on new nav mesh', runMassTest(thetaStar, newNM));
+
+					// FLOW FIELD:
+					appendTime("Flow field on grid", runSingleFlowFieldTest());
+
+					// MASS FLOW FIELD:
+					appendTime("Mass flow field on grid", runMassFlowFieldTest());
+
 				});
 
 				fr.readAsText(fileInput.files[0]);
