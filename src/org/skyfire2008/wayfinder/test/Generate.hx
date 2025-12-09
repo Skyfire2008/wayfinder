@@ -4,6 +4,8 @@ import haxe.Json;
 import haxe.ds.StringMap;
 
 import js.node.Fs;
+import js.Node.process;
+import js.Node.console;
 
 import org.skyfire2008.wayfinder.mapGen.Maze;
 import org.skyfire2008.wayfinder.mapGen.Cave;
@@ -41,11 +43,11 @@ class Generate {
 		var size = sizeMap.get(sizeName);
 		var generator = generatorMap.get(genName);
 		var map = generator.makeMap(size, size);
-		trace("map generated");
+		console.log("map generated");
 
 		map.ensureConnectivity();
 		var mapDef = Map.exportDef(map);
-		trace("connectivity ensured");
+		console.log("connectivity ensured");
 
 		// find points
 		var p0: IntPoint = new IntPoint();
@@ -96,8 +98,8 @@ class Generate {
 
 				for (x in start...size) {
 					if (!map.isWall(x, dist)) {
-						p0.x = x;
-						p0.y = dist;
+						p1.x = x;
+						p1.y = dist;
 						found = true;
 						break;
 					}
@@ -109,8 +111,8 @@ class Generate {
 
 				for (y in start...size) {
 					if (!map.isWall(dist, y)) {
-						p0.x = dist;
-						p0.y = y;
+						p1.x = dist;
+						p1.y = y;
 						found = true;
 						break;
 					}
@@ -136,16 +138,16 @@ class Generate {
 				}
 			}
 		}
-		trace("points found");
+		console.log("points found");
 		var pointsDef: Array<IntPointDef> = points.map((p) -> {x: p.x, y: p.y});
 
 		var oldNM = NavMesh.makeNavMesh(map.walls);
 		var oldNMDef = NavMesh.exportDef(oldNM);
-		trace("old nav mesh created");
+		console.log("old nav mesh created");
 
 		var newNM = NavMesh.makeNavMesh(map.walls, true);
 		var newNMDef = NavMesh.exportDef(newNM);
-		trace("new nav mesh created");
+		console.log("new nav mesh created");
 
 		Fs.writeFileSync(fileName, Json.stringify({
 			oldNM: oldNMDef,
@@ -153,11 +155,16 @@ class Generate {
 			points: pointsDef,
 			map: mapDef
 		}));
-		trace('test case ${fileName} saved');
+		console.log('test case ${fileName} saved');
 
 	}
 
 	public static function main(): Void {
-		generateTestCase("random", "medium");
+
+		if (process.argv.length != 4) {
+			console.log("Usage: node generate.js <Map generator name> <size name>");
+		} else {
+			generateTestCase(process.argv[2], process.argv[3]);
+		}
 	}
 }

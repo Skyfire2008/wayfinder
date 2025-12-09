@@ -9,6 +9,8 @@ import org.skyfire2008.wayfinder.geom.IntPoint.IntPointDef;
 typedef TestCaseDef = {
 	var map: MapDef;
 	var navMesh: NavMeshDef;
+	var ?oldNM: NavMeshDef;
+	var ?newNM: NavMeshDef;
 	var points: Array<IntPointDef>;
 }
 

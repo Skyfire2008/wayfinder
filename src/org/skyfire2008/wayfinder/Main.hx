@@ -385,16 +385,25 @@ class ViewModel {
 			// import navmesh
 			if (testCaseDef.navMesh != null) {
 				this.navMesh.set(NavMesh.importDef(testCaseDef.navMesh, map.width, map.height));
+			} else if (testCaseDef.newNM != null) {
+				this.navMesh.set(NavMesh.importDef(cast testCaseDef.newNM, map.width, map.height));
 			} else {
 				this.navMesh.set(null);
+			}
+
+			// set start and end pos
+			if (testCaseDef.points != null && testCaseDef.points.length >= 2) {
+				this.startPos.set(IntPoint.importDef(testCaseDef.points[0]));
+				this.endPos.set(IntPoint.importDef(testCaseDef.points[1]));
+			} else {
+				this.startPos.set(null);
+				this.endPos.set(null);
 			}
 
 			// reset state
 			this.message.set(null);
 			this.flowField.set(null);
 			this.path.set(null);
-			this.startPos.set(null);
-			this.endPos.set(null);
 
 		});
 		fr.readAsText(elem.files[0]);
