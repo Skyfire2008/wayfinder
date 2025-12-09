@@ -11,6 +11,6 @@
 -lib hxnodejs
 -js bin/generate.js
 -cp src
--main org.skyfire2008.wayfinder.test.Main
+-main org.skyfire2008.wayfinder.test.Generate
 -lib polygonal-ds
 -dce full

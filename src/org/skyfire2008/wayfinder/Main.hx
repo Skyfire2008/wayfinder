@@ -147,7 +147,13 @@ class ViewModel {
 				return elem.get();
 			});
 		});
-		this.navMesh.set(NavMesh.makeNavMesh(walls));
+
+		var timeStart = Browser.window.performance.now();
+		var navMesh = NavMesh.makeNavMesh(walls);
+		var time = Browser.window.performance.now() - timeStart;
+		message.set('Nav mesh generated in: ${time}');
+
+		this.navMesh.set(navMesh);
 	}
 
 	public function genNavMeshImproved() {
@@ -157,7 +163,12 @@ class ViewModel {
 			});
 		});
 
-		this.navMesh.set(NavMesh.makeNavMesh(walls, true));
+		var timeStart = Browser.window.performance.now();
+		var navMesh = NavMesh.makeNavMesh(walls, true);
+		var time = Browser.window.performance.now() - timeStart;
+		message.set('Nav mesh generated in: ${time}');
+
+		this.navMesh.set(navMesh);
 	}
 
 	public function generateMap() {

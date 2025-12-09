@@ -9,6 +9,7 @@ import polygonal.ds.PriorityQueue;
 import org.skyfire2008.wayfinder.path.Pathfinder.PathGraph;
 import org.skyfire2008.wayfinder.geom.IntPoint;
 import org.skyfire2008.wayfinder.geom.IntRect;
+import org.skyfire2008.wayfinder.geom.QuadTree;
 import org.skyfire2008.wayfinder.util.IntIterator.RevIntIterator;
 import org.skyfire2008.wayfinder.util.Util;
 
@@ -329,7 +330,7 @@ class NavMesh implements PathGraph {
 
 		// use distances to calculate max rectangles for every tile, while using it as origin
 		var maxRects: Array<Array<IntRect>> = [];
-		var queue = new PriorityQueue<IntRect>();
+		var queue = new PriorityQueue<IntRect>(1024);
 		for (y in 0...height) {
 			var currentRow: Array<IntRect> = [];
 			maxRects.push(currentRow);
@@ -368,15 +369,33 @@ class NavMesh implements PathGraph {
 			}
 		}
 
-		// TODO: implement quadtree to manage added rects
 		var addedRects: Array<IntRect> = [];
+		var quadTree = new QuadTree(new IntRect(0, 0, width, height), 4);
 		// fetch rects from priority queue
 		while (!queue.empty()) {
 			var rect = queue.dequeue();
 
 			var skip = false;
 			var requeue = false;
-			for (current in addedRects) {
+
+			if (quadTree.pointOccupied(new IntPoint(rect.x, rect.y))) {
+				skip = true;
+			} else {
+				var current = quadTree.queryOne(rect);
+				if (current != null) {
+					requeue = true;
+
+					var newWidth = current.x - rect.x;
+					var newHeight = current.y - rect.y;
+					if (newWidth * rect.height > newHeight * rect.width) {
+						rect.setWidth(newWidth);
+					} else {
+						rect.setHeight(newHeight);
+					}
+				}
+			}
+
+			/*for (current in addedRects) {
 				// if rect's origin is already covered, skip
 				if (current.contains(rect.x, rect.y)) {
 					skip = true;
@@ -395,7 +414,7 @@ class NavMesh implements PathGraph {
 						rect.setHeight(newHeight);
 					}
 				}
-			}
+			}*/
 
 			if (skip) {
 				continue;
@@ -407,6 +426,7 @@ class NavMesh implements PathGraph {
 			}
 
 			addedRects.push(rect);
+			quadTree.add(rect);
 		}
 
 		return addedRects;
