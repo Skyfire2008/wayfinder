@@ -29,7 +29,7 @@ class ThetaStar implements Pathfinder {
 
 		// initialize closed set and priority queue
 		var closed = new Set<PathNode>();
-		var queue = new PriorityQueue<PathNode>(65536, true);
+		var queue = new PriorityQueue<PathNode>(1000000, true);
 
 		startNode.setG(0);
 		// set startNode's previous node to itself so that there's no need to check if node has a previous for visibility check later

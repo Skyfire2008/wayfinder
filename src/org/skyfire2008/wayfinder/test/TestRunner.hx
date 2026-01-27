@@ -58,18 +58,21 @@ class TestRunner {
 	 * @return 				average time
 	 */
 	private static function runTest(pathfinder: Pathfinder, graph: PathGraph): Float {
-		var totalTime = 0.0;
+		var testTimes: Array<Float> = [];
 		for (i in 0...times) {
 			var timeStart = Browser.window.performance.now();
 			var path = pathfinder.findPath(points[0], points[1], graph);
-			totalTime += Browser.window.performance.now() - timeStart;
+			testTimes.push(Browser.window.performance.now() - timeStart);
 		}
-		return totalTime / times;
+		testTimes.sort((x, y) -> x > y ? 1 : -1);
+
+		return testTimes[Std.int(testTimes.length / 2)];
 	}
 
 	private static function runMassTest(pathfinder: Pathfinder, graph: PathGraph): Float {
-		var totalTime = 0.0;
+		var testTimes: Array<Float> = [];
 		for (i in 0...times) {
+			var totalTime = 0.0;
 
 			for (j in 1...units + 1) {
 				var timeStart = Browser.window.performance.now();
@@ -77,23 +80,32 @@ class TestRunner {
 				totalTime += Browser.window.performance.now() - timeStart;
 			}
 
+			testTimes.push(totalTime);
 		}
-		return totalTime / times;
+		testTimes.sort((x, y) -> x > y ? 1 : -1);
+
+		return testTimes[Std.int(testTimes.length / 2)];
 	}
 
 	private static function runMassFlowFieldTest(): Float {
 		var flowField = new FlowField(map.walls, points[0]);
 
-		var totalTime = 0.0;
+		var testTimes: Array<Float> = [];
 		for (i in 0...times) {
+			var totalTime = 0.0;
+
 			for (j in 1...points.length) {
+				testTimes[j] = 0;
 				var timeStart = Browser.window.performance.now();
 				var path = flowField.getPath(points[j]);
 				totalTime += Browser.window.performance.now() - timeStart;
 			}
 
+			testTimes.push(totalTime);
 		}
-		return totalTime / times;
+		testTimes.sort((x, y) -> x > y ? 1 : -1);
+
+		return testTimes[Std.int(testTimes.length / 2)];
 	}
 
 	private static function runSingleFlowFieldTest(): Float {

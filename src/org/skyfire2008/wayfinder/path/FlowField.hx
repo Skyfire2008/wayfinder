@@ -42,10 +42,17 @@ class FlowField {
 			var direction = new IntPoint(nextX - x, nextY - y);
 			directions[y][x] = direction;
 
-			queue.push(calcDirection.bind(x + 1, y, x, y));
-			queue.push(calcDirection.bind(x - 1, y, x, y));
-			queue.push(calcDirection.bind(x, y + 1, x, y));
-			queue.push(calcDirection.bind(x, y - 1, x, y));
+			if ((x + y) % 2 != 0) {
+				queue.push(calcDirection.bind(x + 1, y, x, y));
+				queue.push(calcDirection.bind(x - 1, y, x, y));
+				queue.push(calcDirection.bind(x, y + 1, x, y));
+				queue.push(calcDirection.bind(x, y - 1, x, y));
+			} else {
+				queue.push(calcDirection.bind(x, y - 1, x, y));
+				queue.push(calcDirection.bind(x, y + 1, x, y));
+				queue.push(calcDirection.bind(x - 1, y, x, y));
+				queue.push(calcDirection.bind(x + 1, y, x, y));
+			}
 		};
 
 		calcDirection(end.x, end.y, end.x, end.y);
