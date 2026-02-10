@@ -8,11 +8,12 @@ import org.skyfire2008.wayfinder.geom.IntPoint;
 import org.skyfire2008.wayfinder.path.Pathfinder;
 import org.skyfire2008.wayfinder.path.Pathfinder.PathGraph;
 import org.skyfire2008.wayfinder.path.Pathfinder.PathNode;
+import org.skyfire2008.wayfinder.path.Pathfinder.Temp;
 
 class ThetaStar implements Pathfinder {
 	public function new() {}
 
-	public function findPath(start: IntPoint, end: IntPoint, graph: PathGraph): Array<IntPoint> {
+	public function findPath(start: IntPoint, end: IntPoint, graph: PathGraph): Temp {
 		var startNode = graph.getNode(start);
 		if (startNode == null) {
 			throw "Start node is undefined or a wall";
@@ -24,12 +25,12 @@ class ThetaStar implements Pathfinder {
 		}
 
 		if (start.x == end.x && start.y == end.y) {
-			return [start, end];
+			return {path: [start, end], closed: []};
 		}
 
 		// initialize closed set and priority queue
 		var closed = new Set<PathNode>();
-		var queue = new PriorityQueue<PathNode>(1000000, true);
+		var queue = new PriorityQueue<PathNode>(1000, true);
 
 		startNode.setG(0);
 		// set startNode's previous node to itself so that there's no need to check if node has a previous for visibility check later
@@ -113,6 +114,14 @@ class ThetaStar implements Pathfinder {
 			node.resetPathfinding();
 		}
 
-		return points;
+		var closedArray: Array<IntPoint> = [];
+		for (node in closed) {
+			closedArray.push(node.pos);
+		}
+
+		return {
+			path: points,
+			closed: closedArray
+		};
 	}
 }

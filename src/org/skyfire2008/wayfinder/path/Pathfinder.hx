@@ -82,9 +82,13 @@ interface PathGraph {
 
 }
 
+typedef Temp = {
+	var path: Array<IntPoint>;
+	var closed: Array<IntPoint>;
+}
+
 // TODO: rethink the type parameters for Pathfinder
 interface Pathfinder {
-
 	/**
 	 * Finds the shortest path. Assume that start and end are valid and not the same
 	 * @param start 		starting position
@@ -92,6 +96,5 @@ interface Pathfinder {
 	 * @param pathGraph 	graph to pathfind in
 	 * @return 				array of points
 	 */
-	public function findPath(start: IntPoint, end: IntPoint, pathGraph: PathGraph): Array<IntPoint>;
-
+	public function findPath(start: IntPoint, end: IntPoint, pathGraph: PathGraph): Temp;
 }

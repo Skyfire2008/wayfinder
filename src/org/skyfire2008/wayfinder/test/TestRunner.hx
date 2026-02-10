@@ -157,44 +157,44 @@ class TestRunner {
 					appendTime("A* on grid", runTest(aStar, grid));
 
 					// MASS A* ON GRID:
-					appendTime('A* with ${units} units on grid', runMassTest(aStar, grid));
+					// appendTime('A* with ${units} units on grid', runMassTest(aStar, grid));
 
 					// THETA* ON GRID:
 					appendTime("Theta* on grid", runTest(thetaStar, grid));
 
 					// MASS THETA* ON GRID:
-					appendTime('Theta* with ${units} units on grid', runMassTest(thetaStar, grid));
+					// appendTime('Theta* with ${units} units on grid', runMassTest(thetaStar, grid));
 
 					// A* ON OLD NAVMESH:
 					appendTime("A* on old nav mesh", runTest(aStar, oldNM));
 
 					// MASS A* ON OLD NAVMESH:
-					appendTime('A* with ${units} units on old nav mesh', runMassTest(thetaStar, oldNM));
+					// appendTime('A* with ${units} units on old nav mesh', runMassTest(thetaStar, oldNM));
 
 					// THETA* ON OLD NAVMESH:
 					appendTime("Theta* on old nav mesh", runTest(thetaStar, oldNM));
 
 					// MASS THETA* ON OLD NAV MESH
-					appendTime('Theta* with ${units} units on old nav mesh', runMassTest(thetaStar, oldNM));
+					// appendTime('Theta* with ${units} units on old nav mesh', runMassTest(thetaStar, oldNM));
 
 					// A* ON NEW NAVMESH:
 					appendTime("A* on new nav mesh", runTest(aStar, newNM));
 
 					// MASS A* ON NEW NAVMESH:
-					appendTime('A* with ${units} units on new nav mesh', runMassTest(aStar, newNM));
+					// appendTime('A* with ${units} units on new nav mesh', runMassTest(aStar, newNM));
 
 					// THETA* ON NEW NAVMESH:
 					appendTime("Theta* on new nav mesh", runTest(thetaStar, newNM));
 
 					// MASS THETA* ON NEW NAVMESH:
-					appendTime('Theta* with ${units} units on new nav mesh', runMassTest(thetaStar, newNM));
+					// appendTime('Theta* with ${units} units on new nav mesh', runMassTest(thetaStar, newNM));
 
 					// FLOW FIELD:
-					var flowFieldTime = runSingleFlowFieldTest();
-					appendTime("Flow field on grid", flowFieldTime);
+					// var flowFieldTime = runSingleFlowFieldTest();
+					// appendTime("Flow field on grid", flowFieldTime);
 
 					// MASS FLOW FIELD:
-					appendTime("Mass flow field on grid", flowFieldTime + runMassFlowFieldTest());
+					// appendTime("Mass flow field on grid", flowFieldTime + runMassFlowFieldTest());
 
 				});
 

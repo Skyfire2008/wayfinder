@@ -62,6 +62,7 @@ class ViewModel {
 
 	public var navMesh: Observable<NavMesh>;
 	public var path: Observable<Array<Line>>;
+	public var closed: Observable<Array<IntPoint>>;
 	public var flowField: Observable<FlowField>;
 	public var message: Observable<String>;
 
@@ -94,6 +95,7 @@ class ViewModel {
 
 		this.navMesh = Knockout.observable(null);
 		this.path = Knockout.observable([]);
+		this.closed = Knockout.observable([]);
 		this.flowField = Knockout.observable(null);
 		this.message = Knockout.observable(null);
 
@@ -265,10 +267,10 @@ class ViewModel {
 			var aStar = new AStar();
 			try {
 				var timeStart = Browser.window.performance.now();
-				var points = aStar.findPath(startPos.get(), endPos.get(), navMeshValue);
+				var foo = aStar.findPath(startPos.get(), endPos.get(), navMeshValue);
 				var time = Browser.window.performance.now() - timeStart;
 
-				calcAndSetPathLines(points, time);
+				calcAndSetPathLines(foo.path, time);
 
 			} catch (e) {
 				message.set(e.message);
@@ -286,10 +288,10 @@ class ViewModel {
 			var thetaStar = new ThetaStar();
 			try {
 				var timeStart = Browser.window.performance.now();
-				var points = thetaStar.findPath(startPos.get(), endPos.get(), navMeshValue);
+				var foo = thetaStar.findPath(startPos.get(), endPos.get(), navMeshValue);
 				var time = Browser.window.performance.now() - timeStart;
 
-				calcAndSetPathLines(points, time);
+				calcAndSetPathLines(foo.path, time);
 
 			} catch (e) {
 				message.set(e.message);
@@ -404,6 +406,7 @@ class ViewModel {
 			this.message.set(null);
 			this.flowField.set(null);
 			this.path.set(null);
+			this.closed.set([]);
 
 		});
 		fr.readAsText(elem.files[0]);
@@ -435,9 +438,12 @@ class ViewModel {
 
 		try {
 			var timeStart = Browser.window.performance.now();
-			var points = pathfinder.findPath(startPos.get(), endPos.get(), grid);
+			var foo = pathfinder.findPath(startPos.get(), endPos.get(), grid);
 			var time = Browser.window.performance.now() - timeStart;
-			calcAndSetPathLines(points, time);
+			calcAndSetPathLines(foo.path, time);
+			trace('closed points: ${foo.closed.length}');
+			closed.set(foo.closed);
+
 		} catch (e) {
 			message.set(e.message);
 		}

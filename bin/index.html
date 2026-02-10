@@ -61,6 +61,17 @@
 				<!-- /ko -->
 				<!-- /ko -->
 
+				<!-- ko foreach: closed() -->
+				<circle stroke="#0040ff" stroke-width="2" fill="none" data-bind="
+						attr:{
+							cx: (x+0.5)*$root.tileWidth,
+							cy: (y+0.5)*$root.tileHeight,
+							r: $root.tileWidth/2-1
+						}
+					">
+				</circle>
+				<!-- /ko -->
+
 				<!-- ko foreach: path() -->
 				<line stroke="#ffff00" stroke-linecap="round" stroke-width="5" class="noMouseEvents" data-bind="
 					attr: {
