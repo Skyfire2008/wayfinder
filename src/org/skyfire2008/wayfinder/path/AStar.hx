@@ -1,6 +1,6 @@
 package org.skyfire2008.wayfinder.path;
 
-import js.lib.Set;
+import haxe.ds.ObjectMap;
 
 import polygonal.ds.PriorityQueue;
 
@@ -28,7 +28,7 @@ class AStar implements Pathfinder {
 		}
 
 		// initialize closed set and priority queue
-		var closed = new Set<PathNode>();
+		var closed = new ObjectMap<PathNode, Bool>();
 		var queue = new PriorityQueue<PathNode>(1000000, true);
 
 		startNode.setG(0);
@@ -39,7 +39,7 @@ class AStar implements Pathfinder {
 
 			// get best node and add it to closed set
 			var current = queue.dequeue();
-			closed.add(current);
+			closed.set(current, true);
 
 			// if end reached, stop
 			if (current == endNode) {
@@ -50,7 +50,7 @@ class AStar implements Pathfinder {
 			for (neighbour in current.neighbours) {
 
 				// skip if neighbour is already closed
-				if (closed.has(neighbour)) {
+				if (closed.exists(neighbour)) {
 					continue;
 				}
 
@@ -80,7 +80,7 @@ class AStar implements Pathfinder {
 		}
 
 		// check that path is finished
-		if (!closed.has(endNode)) {
+		if (!closed.exists(endNode)) {
 			throw "End unreachable";
 		}
 
@@ -94,7 +94,7 @@ class AStar implements Pathfinder {
 		points.unshift(start);
 
 		// reset pathfinding
-		for (node in closed) {
+		for (node in closed.keys()) {
 			node.resetPathfinding();
 		}
 		for (node in queue) {

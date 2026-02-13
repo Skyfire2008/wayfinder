@@ -2,7 +2,7 @@ package org.skyfire2008.wayfinder.path;
 
 import org.skyfire2008.wayfinder.path.Pathfinder.PathNode;
 
-import js.lib.Set;
+import haxe.ds.ObjectMap;
 
 import polygonal.ds.PriorityQueue;
 
@@ -86,7 +86,7 @@ class NavMesh implements PathGraph {
 	public static function exportDef(navmesh: NavMesh): NavMeshDef {
 		var nodes: Array<NodeDef> = [];
 		var edges: Array<EdgeDef> = [];
-		var edgeSet = new Set<PathNode>();
+		var edgeSet = new ObjectMap<PathNode, Bool>();
 
 		for (node in navmesh.nodes) {
 			nodes.push({
@@ -100,8 +100,8 @@ class NavMesh implements PathGraph {
 				// FIXME: do not use casting!
 				var edge = cast(neighbour, Edge);
 
-				if (!edgeSet.has(neighbour)) {
-					edgeSet.add(neighbour);
+				if (!edgeSet.exists(neighbour)) {
+					edgeSet.set(neighbour, true);
 					edges.push({
 						p0: IntPoint.exportDef(edge.p0),
 						p1: IntPoint.exportDef(edge.p1),

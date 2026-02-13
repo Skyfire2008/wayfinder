@@ -57,7 +57,7 @@ class TestRunner {
 	 * @param graph 		map graph
 	 * @return 				average time
 	 */
-	private static function runTest(pathfinder: Pathfinder, graph: PathGraph): Float {
+	public static function runTest(pathfinder: Pathfinder, graph: PathGraph): Float {
 		var testTimes: Array<Float> = [];
 		for (i in 0...times) {
 			var timeStart = Browser.window.performance.now();
@@ -69,7 +69,7 @@ class TestRunner {
 		return testTimes[Std.int(testTimes.length / 2)];
 	}
 
-	private static function runMassTest(pathfinder: Pathfinder, graph: PathGraph): Float {
+	public static function runMassTest(pathfinder: Pathfinder, graph: PathGraph): Float {
 		var testTimes: Array<Float> = [];
 		for (i in 0...times) {
 			var totalTime = 0.0;
@@ -87,7 +87,7 @@ class TestRunner {
 		return testTimes[Std.int(testTimes.length / 2)];
 	}
 
-	private static function runMassFlowFieldTest(): Float {
+	public static function runMassFlowFieldTest(): Float {
 		var flowField = new FlowField(map.walls, points[0]);
 
 		var testTimes: Array<Float> = [];

@@ -1,23 +1,32 @@
--js bin/index.js
--cp src
--main org.skyfire2008.wayfinder.Main
--lib knockout.hx
--lib polygonal-ds
+# -js bin/index.js
+# -cp src
+# -main org.skyfire2008.wayfinder.Main
+# -lib knockout.hx
+# -lib polygonal-ds
 
-# set this to debug NavMesh.checkVisibility(...)
-#--debug
+# # set this to debug NavMesh.checkVisibility(...)
+# # --debug
 
---next 
--js bin/generate.js
--cp src
--main org.skyfire2008.wayfinder.test.Generate
--lib hxnodejs
--lib polygonal-ds
--dce full
+# --next 
+# -js bin/generate.js
+# -cp src
+# -main org.skyfire2008.wayfinder.test.Generate
+# -lib hxnodejs
+# -lib polygonal-ds
+# -dce full
 
---next
--js bin/testRunner.js
--cp src
--main org.skyfire2008.wayfinder.test.TestRunner
--lib polygonal-ds
--dce full
+# --next
+# -js bin/testRunner.js
+# -cp src
+# -main org.skyfire2008.wayfinder.test.TestRunner
+# -lib polygonal-ds
+# -dce full
+
+# --next
+ -cpp bin/cppTestRunner
+ -cp src
+ -main org.skyfire2008.wayfinder.test.CPPTestRunner
+ -lib polygonal-ds
+ -dce full
+ -D no-debug
+ -D analyzer-optimize
