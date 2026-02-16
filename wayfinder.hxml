@@ -8,25 +8,44 @@
 # # --debug
 
 # --next 
-# -js bin/generate.js
-# -cp src
-# -main org.skyfire2008.wayfinder.test.Generate
-# -lib hxnodejs
-# -lib polygonal-ds
-# -dce full
+-js bin/generate.js
+-cp src
+-main org.skyfire2008.wayfinder.test.Generate
+-lib hxnodejs
+-lib polygonal-ds
+-dce full
+
+ --next
+-js bin/testRunner.js
+-cp src
+-main org.skyfire2008.wayfinder.test.TestRunner
+-lib polygonal-ds
+-D analyzer-optimize
+-dce full
 
 # --next
-# -js bin/testRunner.js
-# -cp src
-# -main org.skyfire2008.wayfinder.test.TestRunner
-# -lib polygonal-ds
-# -dce full
+#  -cpp bin/cppTestRunner
+#  -cp src
+#  -main org.skyfire2008.wayfinder.test.CPPTestRunner
+#  -lib polygonal-ds
+#  -dce full
+#  -D no-debug
+#  -D analyzer-optimize
+#  -D no-reflection
 
-# --next
- -cpp bin/cppTestRunner
- -cp src
- -main org.skyfire2008.wayfinder.test.CPPTestRunner
- -lib polygonal-ds
- -dce full
- -D no-debug
- -D analyzer-optimize
+# -cp src
+# -main org.skyfire2008.wayfinder.test.CPPTestRunner
+# -lib polygonal-ds
+# -lib reflaxe.cpp
+# -D cpp-output=bin/reflaxe
+
+# -cp src
+# -main org.skyfire2008.wayfinder.test.CPPTestRunner
+# -lib polygonal-ds
+# -hl bin/hl/main.c
+# -D hlgen.makefile=vs2019
+
+# -cp src
+# -main org.skyfire2008.wayfinder.test.CPPTestRunner
+# -lib polygonal-ds
+# -hl bin/hl/testRunner.hl

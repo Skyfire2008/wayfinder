@@ -1,5 +1,6 @@
 bin/*.js
 bin/*.n
+bin/hl
 bin/cppTestrunner
 tests
 results
